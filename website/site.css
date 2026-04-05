@@ -752,6 +752,7 @@ ol {
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  will-change: transform;
 }
 
 .install-code {
@@ -844,62 +845,50 @@ ol {
   margin-top: 24px;
 }
 
-.footer {
+.page-footer {
   position: relative;
   z-index: 2;
-  border-top: 1px solid var(--line);
-  padding: 28px 44px;
-}
-
-.footer-inner {
-  max-width: 1100px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  padding: 56px 20px 40px;
+  display: grid;
+  justify-items: center;
   gap: 16px;
 }
 
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.footer-mark {
+.footer-rule {
   position: relative;
-  width: 24px;
-  height: 24px;
-  border-radius: 6px;
-  background: linear-gradient(135deg, rgba(199, 255, 94, 0.95), rgba(131, 201, 255, 0.92));
+  width: min(75vw, 980px);
+  height: 10px;
+  overflow: hidden;
 }
 
-.footer-mark::after {
-  content: "";
+.footer-rule-base,
+.footer-rule-beam {
   position: absolute;
-  inset: 5px;
-  border-radius: 50%;
-  border: 1.5px solid rgba(8, 14, 13, 0.55);
+  top: 50%;
+  left: 0;
+  width: 100%;
+  transform: translateY(-50%);
 }
 
-.footer-word {
-  font-family: "Sora", "Segoe UI", sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  color: var(--text);
+.footer-rule-base {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(243, 246, 239, 0.12), rgba(243, 246, 239, 0.28), transparent);
 }
 
-.footer-meta {
-  text-align: right;
+.footer-rule-beam {
+  width: 17%;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(199, 255, 94, 0.42), rgba(232, 255, 154, 0.5), transparent);
+  filter: blur(3px);
+  opacity: 0.92;
 }
 
-.footer-by {
+.page-footer p {
   margin: 0;
-  color: var(--text);
-  font-size: 0.81rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
+  color: var(--subtle);
+  font-size: 0.92rem;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
 }
 
@@ -1043,18 +1032,8 @@ body.modal-open {
     grid-template-columns: 1fr;
   }
 
-  .footer {
-    padding: 22px 20px;
-  }
-
-  .footer-inner {
-    flex-direction: column;
-    gap: 12px;
-    text-align: center;
-  }
-
-  .footer-meta {
-    text-align: center;
+  .page-footer {
+    padding-top: 44px;
   }
 
   .install-modal {
