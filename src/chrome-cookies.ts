@@ -146,6 +146,7 @@ function runPowerShell(script: string): string {
 function unprotectWindowsData(data: Buffer): Buffer {
   const base64 = data.toString('base64');
   const script =
+    `Add-Type -AssemblyName System.Security; ` +
     `$bytes = [Convert]::FromBase64String('${base64}'); ` +
     `$plain = [System.Security.Cryptography.ProtectedData]::Unprotect(` +
     `$bytes, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser); ` +
