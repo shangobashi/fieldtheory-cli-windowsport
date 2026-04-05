@@ -733,6 +733,7 @@ ol {
 
 .install-card,
 .modal-card {
+  min-width: 0;
   padding: 22px;
   border-radius: 24px;
   background: rgba(255, 255, 255, 0.04);
@@ -740,19 +741,29 @@ ol {
 }
 
 .install-code {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
   gap: 10px;
   margin-bottom: 18px;
 }
 
 .install-code span {
-  display: block;
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: rgba(11, 15, 14, 0.9);
+  display: inline-flex;
+  width: fit-content;
+  max-width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(199, 255, 94, 0.12);
+  background: rgba(11, 15, 14, 0.94);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   color: var(--text);
   font-family: "IBM Plex Mono", monospace;
+  font-size: 0.88rem;
+  line-height: 1.45;
   letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
 }
 
 .install-card ol,
@@ -825,7 +836,7 @@ ol {
   padding: 56px 20px 40px;
   display: grid;
   justify-items: center;
-  gap: 16px;
+  gap: 18px;
 }
 
 .footer-rule {
@@ -858,11 +869,68 @@ ol {
   opacity: 0.92;
 }
 
-.page-footer p {
-  color: var(--subtle);
-  font-size: 0.92rem;
-  letter-spacing: 0.08em;
+.footer-shell {
+  width: min(75vw, 980px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.footer-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footer-mark {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(199, 255, 94, 0.95), rgba(131, 201, 255, 0.92));
+  box-shadow: 0 0 24px rgba(199, 255, 94, 0.22);
+}
+
+.footer-mark::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 999px;
+  border: 1px solid rgba(8, 14, 13, 0.55);
+  background: rgba(243, 246, 239, 0.18);
+}
+
+.footer-word {
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--text);
+}
+
+.footer-meta {
+  text-align: right;
+}
+
+.footer-by,
+.footer-copy {
+  margin: 0;
   text-transform: uppercase;
+}
+
+.footer-by {
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.footer-copy {
+  margin-top: 5px;
+  color: var(--subtle);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
 }
 
 body.modal-open {
@@ -1003,6 +1071,16 @@ body.modal-open {
 
   .page-footer {
     padding-top: 44px;
+  }
+
+  .footer-shell {
+    width: min(100%, 980px);
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footer-meta {
+    text-align: center;
   }
 
   .install-modal {
