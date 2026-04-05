@@ -165,21 +165,6 @@ function initAnimations() {
     });
   });
 
-  gsap.utils.toArray(".panel, .install-card, .modal-card").forEach((element, index) => {
-    gsap.from(element, {
-      y: 32,
-      autoAlpha: 0,
-      scale: 0.985,
-      duration: 0.82,
-      delay: (index % 3) * 0.04,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: element,
-        start: "top 88%"
-      }
-    });
-  });
-
   if (window.matchMedia("(pointer: fine)").matches) {
     gsap.utils.toArray(".panel, .step, .install-card, .modal-card").forEach((element) => {
       const card = element;
