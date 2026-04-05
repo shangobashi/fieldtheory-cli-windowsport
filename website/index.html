@@ -220,10 +220,10 @@
       <section class="install-band" data-reveal>
         <div class="install-copy">
           <p class="section-label">Install</p>
-          <h2>Clone it, build it, run it.</h2>
+          <h2>Install it directly from GitHub and run it.</h2>
           <p>
-            This fork currently ships through the GitHub repo. The fast path is clone, install dependencies, build the
-            CLI, and run `ftx doctor` before your first sync.
+            This fork currently ships through the GitHub repo. The fastest path is a global GitHub install, then
+            `ftx doctor`, then your first sync.
           </p>
           <div class="install-actions">
             <a
@@ -247,16 +247,16 @@
 
         <div class="install-card">
           <div class="install-code">
-            <span>git clone https://github.com/shangobashi/fieldtheory-cli-windowsport.git</span>
-            <span>cd fieldtheory-cli-windowsport</span>
-            <span>npm install &amp;&amp; npm run build</span>
-            <span>node bin/ft.mjs doctor</span>
+            <span>npm install -g github:shangobashi/fieldtheory-cli-windowsport</span>
+            <span>ftx doctor</span>
+            <span>ftx sync</span>
+            <span>ftx search "ai memory"</span>
           </div>
           <ol>
-            <li>Clone the repository to your Windows machine.</li>
-            <li>Install dependencies and build the CLI.</li>
+            <li>Install the CLI globally from the GitHub repo.</li>
             <li>Run `ftx doctor` to verify Chrome and LLM tooling.</li>
             <li>Close Chrome, then run `ftx sync` against the profile logged into X.</li>
+            <li>Search and inspect the local archive from the terminal.</li>
           </ol>
         </div>
       </section>
@@ -287,12 +287,12 @@
 
           <article class="modal-card">
             <p class="tiny-label">Install steps</p>
-            <strong>Clone, install, build, doctor, sync.</strong>
+            <strong>Install from GitHub, doctor, sync.</strong>
             <ol>
-              <li>Clone `fieldtheory-cli-windowsport` from GitHub.</li>
-              <li>Run `npm install` and `npm run build`.</li>
-              <li>Run `node bin/ft.mjs doctor`.</li>
-              <li>Close Chrome and run `node bin/ft.mjs sync`.</li>
+              <li>Run `npm install -g github:shangobashi/fieldtheory-cli-windowsport`.</li>
+              <li>Run `ftx doctor`.</li>
+              <li>Close Chrome and run `ftx sync`.</li>
+              <li>Use `ftx search`, `ftx viz`, and `ftx stats` once synced.</li>
             </ol>
           </article>
         </div>

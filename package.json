@@ -28,6 +28,13 @@
     "type": "git",
     "url": "git+https://github.com/shangobashi/fieldtheory-cli-windowsport.git"
   },
+  "homepage": "https://github.com/shangobashi/fieldtheory-cli-windowsport#readme",
+  "bugs": {
+    "url": "https://github.com/shangobashi/fieldtheory-cli-windowsport/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "keywords": [
     "bookmarks",
     "twitter",

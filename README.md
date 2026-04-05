@@ -38,6 +38,8 @@ npm install -g github:shangobashi/fieldtheory-cli-windowsport
 ftx --help
 ```
 
+On Windows PowerShell, if script execution blocks `npm`, use `npm.cmd` instead.
+
 Requires Node.js 20+ and Google Chrome.
 
 ## Quick Start
@@ -123,6 +125,18 @@ Or with environment variables:
 ```bash
 set FTX_LLM_ENGINE=codex
 ```
+
+## Publishing
+
+For maintainers publishing to npm for the first time:
+
+```bash
+npm adduser
+npm whoami
+npm publish
+```
+
+If PowerShell blocks `npm`, use `npm.cmd adduser`, `npm.cmd whoami`, and `npm.cmd publish`.
 
 ## Platform Support
 
