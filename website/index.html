@@ -220,10 +220,10 @@
       <section class="install-band" data-reveal>
         <div class="install-copy">
           <p class="section-label">Install</p>
-          <h2>Install it directly from GitHub and run it.</h2>
+          <h2>Install it from npm and run it.</h2>
           <p>
-            This fork currently ships through the GitHub repo. The fastest path is a global GitHub install, then
-            `ftx doctor`, then your first sync.
+            The fastest path is the published npm package, then `ftx doctor`, then your first sync. If you want the
+            tip-of-tree version instead, the GitHub install path is still available.
           </p>
           <div class="install-actions">
             <a
@@ -247,13 +247,13 @@
 
         <div class="install-card">
           <div class="install-code">
-            <span>npm install -g github:shangobashi/fieldtheory-cli-windowsport</span>
+            <span>npm install -g fieldtheory-cli-windowsport</span>
             <span>ftx doctor</span>
             <span>ftx sync</span>
             <span>ftx search "ai memory"</span>
           </div>
           <ol>
-            <li>Install the CLI globally from the GitHub repo.</li>
+            <li>Install the CLI globally from npm.</li>
             <li>Run `ftx doctor` to verify Chrome and LLM tooling.</li>
             <li>Close Chrome, then run `ftx sync` against the profile logged into X.</li>
             <li>Search and inspect the local archive from the terminal.</li>
@@ -267,10 +267,10 @@
       <section class="install-modal" role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
         <button class="modal-close" type="button" data-close-install aria-label="Close install instructions">Close</button>
         <p class="section-label">Install FieldTheory for Windows</p>
-        <h2 id="installModalTitle">A practical Windows flow from clone to first sync.</h2>
+        <h2 id="installModalTitle">A practical Windows flow from install to first sync.</h2>
         <p class="modal-lede">
-          This fork focuses on the Windows runtime, keeps the CLI local-first, and makes the command surface easier to
-          use from Codex.
+          This fork focuses on the Windows runtime, keeps the CLI local-first, and now ships both through npm and the
+          GitHub repo.
         </p>
 
         <div class="modal-grid">
@@ -287,9 +287,9 @@
 
           <article class="modal-card">
             <p class="tiny-label">Install steps</p>
-            <strong>Install from GitHub, doctor, sync.</strong>
+            <strong>Install from npm, doctor, sync.</strong>
             <ol>
-              <li>Run `npm install -g github:shangobashi/fieldtheory-cli-windowsport`.</li>
+              <li>Run `npm install -g fieldtheory-cli-windowsport`.</li>
               <li>Run `ftx doctor`.</li>
               <li>Close Chrome and run `ftx sync`.</li>
               <li>Use `ftx search`, `ftx viz`, and `ftx stats` once synced.</li>

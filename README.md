@@ -18,16 +18,10 @@ This project is completely inspired by **FieldTheory by Andrew Farah**. The orig
 
 ## Install
 
-```bash
-npm install
-npm run build
-node bin/ft.mjs --help
-```
-
-Global install:
+Install from npm:
 
 ```bash
-npm install -g .
+npm install -g fieldtheory-cli-windowsport
 ftx --help
 ```
 
@@ -35,6 +29,15 @@ Install directly from GitHub:
 
 ```bash
 npm install -g github:shangobashi/fieldtheory-cli-windowsport
+ftx --help
+```
+
+Install from a local checkout:
+
+```bash
+npm install
+npm run build
+npm install -g .
 ftx --help
 ```
 
