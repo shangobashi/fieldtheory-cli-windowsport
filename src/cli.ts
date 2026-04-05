@@ -54,7 +54,7 @@ function friendlyStopReason(raw?: string): string {
 const LOGO = `
    \x1b[2m\u250c\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2510\x1b[0m
    \x1b[2m\u2502\x1b[0m   \x1b[1mFieldTheory for Windows\x1b[0m  \x1b[2m\u2502\x1b[0m
-   \x1b[2m\u2502\x1b[0m  \x1b[2minspired by Andrew Farah\x1b[0m  \x1b[2m\u2502\x1b[0m
+   \x1b[2m\u2502\x1b[0m      \x1b[2mby Shango Bashi\x1b[0m      \x1b[2m\u2502\x1b[0m
    \x1b[2m\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\x1b[0m`;
 
 function selectedEngine(optionValue?: string): 'auto' | 'claude' | 'codex' {
@@ -226,7 +226,7 @@ export function buildCli() {
 
   program
     .name('ftx')
-    .description('FieldTheory for Windows. Inspired by Andrew Farah. Sync, search, classify, and explore X/Twitter bookmarks locally.')
+    .description('FieldTheory for Windows by Shango Bashi. Sync, search, classify, and explore X/Twitter bookmarks locally.')
     .version('0.1.0')
     .showHelpAfterError()
     .hook('preAction', () => {
@@ -307,7 +307,7 @@ export function buildCli() {
           console.log(`        ftx viz`);
           console.log(`        ftx categories`);
           console.log(`\n  Ask Codex to use the ftx CLI to search and explore your bookmarks.`);
-          console.log(`  This fork is inspired by FieldTheory by Andrew Farah.\n`);
+          console.log(`  FieldTheory for Windows by Shango Bashi.\n`);
         }
       } catch (err) {
         const msg = (err as Error).message;
@@ -618,8 +618,7 @@ export function buildCli() {
       console.log(`Chrome user data: ${chromeDir}`);
       console.log(`Chrome status: ${chromeStatus}`);
       console.log(`LLM engines: ${engines.length ? engines.join(', ') : 'none found'}`);
-      console.log('Project: FieldTheory for Windows');
-      console.log('Inspired by: FieldTheory by Andrew Farah');
+      console.log('Project: FieldTheory for Windows by Shango Bashi');
     }));
 
   // ── sample ──────────────────────────────────────────────────────────────
