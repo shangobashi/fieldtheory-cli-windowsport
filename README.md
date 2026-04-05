@@ -31,6 +31,13 @@ npm install -g .
 ftx --help
 ```
 
+Install directly from GitHub:
+
+```bash
+npm install -g github:shangobashi/fieldtheory-cli-windowsport
+ftx --help
+```
+
 Requires Node.js 20+ and Google Chrome.
 
 ## Quick Start
