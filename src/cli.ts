@@ -244,8 +244,9 @@ export function buildCli() {
     .option('--engine <engine>', 'Classification engine: auto, codex, claude', 'auto')
     .option('--max-pages <n>', 'Max pages to fetch', (v: string) => Number(v), 500)
     .option('--target-adds <n>', 'Stop after N new bookmarks', (v: string) => Number(v))
-    .option('--delay-ms <n>', 'Delay between requests in ms', (v: string) => Number(v), 600)
+    .option('--delay-ms <n>', 'Delay between requests in ms (default: 150)', (v: string) => Number(v), 150)
     .option('--max-minutes <n>', 'Max runtime in minutes', (v: string) => Number(v), 30)
+    .option('--prefetch <n>', 'Pages to prefetch ahead (0 = disable pipeline)', (v: string) => Number(v), 1)
     .option('--chrome-user-data-dir <path>', 'Chrome user-data directory')
     .option('--chrome-profile-directory <name>', 'Chrome profile name')
     .option('--csrf-token <token>', 'Direct CSRF token override (skips Chrome cookie extraction)')
@@ -276,8 +277,9 @@ export function buildCli() {
             incremental: !Boolean(options.full),
             maxPages: Number(options.maxPages) || 500,
             targetAdds: typeof options.targetAdds === 'number' && !Number.isNaN(options.targetAdds) ? options.targetAdds : undefined,
-            delayMs: Number(options.delayMs) || 600,
+            delayMs: Number(options.delayMs) || 150,
             maxMinutes: Number(options.maxMinutes) || 30,
+            prefetchPages: typeof options.prefetch === 'number' ? options.prefetch : 1,
             chromeUserDataDir: options.chromeUserDataDir ? String(options.chromeUserDataDir) : undefined,
             chromeProfileDirectory: options.chromeProfileDirectory ? String(options.chromeProfileDirectory) : undefined,
             csrfToken: options.csrfToken ? String(options.csrfToken) : undefined,

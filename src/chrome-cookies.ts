@@ -1,9 +1,12 @@
 import { execFileSync } from 'node:child_process';
-import { copyFileSync, existsSync, readFileSync, unlinkSync } from 'node:fs';
+import { existsSync, readFileSync, unlinkSync } from 'node:fs';
+import { promises as fsPromises } from 'node:fs';
 import { createDecipheriv, createHash, pbkdf2Sync, randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { platform, tmpdir } from 'node:os';
 import { openDb } from './db.js';
+
+const _masterKeyCache = new Map<string, Buffer>();
 
 export interface ChromeCookieResult {
   csrfToken: string;
@@ -159,6 +162,9 @@ function unprotectWindowsData(data: Buffer): Buffer {
 }
 
 function getWindowsChromeMasterKey(chromeUserDataDir: string): Buffer {
+  const cached = _masterKeyCache.get(chromeUserDataDir);
+  if (cached) return cached;
+
   const localStatePath = join(chromeUserDataDir, 'Local State');
   if (!existsSync(localStatePath)) {
     throw new Error(
@@ -180,7 +186,9 @@ function getWindowsChromeMasterKey(chromeUserDataDir: string): Buffer {
   const keyPayload = encryptedKey.subarray(0, 5).equals(dpapiPrefix)
     ? encryptedKey.subarray(5)
     : encryptedKey;
-  return unprotectWindowsData(keyPayload);
+  const key = unprotectWindowsData(keyPayload);
+  _masterKeyCache.set(chromeUserDataDir, key);
+  return key;
 }
 
 async function queryCookies(
@@ -200,7 +208,7 @@ async function queryCookies(
   let queryPath = dbPath;
 
   try {
-    copyFileSync(dbPath, tempDbPath);
+    await fsPromises.copyFile(dbPath, tempDbPath);
     queryPath = tempDbPath;
   } catch {
     queryPath = dbPath;

@@ -42,7 +42,7 @@ export interface SyncOptions {
   maxPages?: number;
   /** Stop once this many *new* bookmarks have been added. Default: unlimited */
   targetAdds?: number;
-  /** Delay between page requests in ms. Default: 600 */
+  /** Delay between page requests in ms. Default: 150 */
   delayMs?: number;
   /** Max runtime in minutes. Default: 30 */
   maxMinutes?: number;
@@ -60,6 +60,8 @@ export interface SyncOptions {
   onProgress?: (status: SyncProgress) => void;
   /** Flush to disk every N pages. Default: 25 */
   checkpointEvery?: number;
+  /** Number of pages to prefetch ahead. Default: 1 (pipeline mode). Set to 0 to disable. */
+  prefetchPages?: number;
 }
 
 export interface SyncProgress {
@@ -383,10 +385,11 @@ export async function syncBookmarksGraphQL(
 ): Promise<SyncResult> {
   const incremental = options.incremental ?? true;
   const maxPages = options.maxPages ?? 500;
-  const delayMs = options.delayMs ?? 600;
+  const delayMs = options.delayMs ?? 150;
   const maxMinutes = options.maxMinutes ?? 30;
   const stalePageLimit = options.stalePageLimit ?? 3;
   const checkpointEvery = options.checkpointEvery ?? 25;
+  const prefetchPages = options.prefetchPages ?? 1;
 
   let csrfToken: string;
   let cookieHeader: string | undefined;
@@ -422,18 +425,33 @@ export async function syncBookmarksGraphQL(
   const allSeenIds: string[] = [];
   let stopReason = 'unknown';
 
+  // Pipeline: start first fetch immediately
+  let pendingFetch: Promise<PageResult> = prefetchPages > 0
+    ? fetchPageWithRetry(csrfToken, cursor, cookieHeader)
+    : fetchPageWithRetry(csrfToken, cursor, cookieHeader);
+
   while (page < maxPages) {
     if (Date.now() - started > maxMinutes * 60_000) {
       stopReason = 'max runtime reached';
       break;
     }
 
-    const result = await fetchPageWithRetry(csrfToken, cursor, cookieHeader);
+    const result = await pendingFetch;
     page += 1;
 
     if (result.records.length === 0 && !result.nextCursor) {
       stopReason = 'end of bookmarks';
       break;
+    }
+
+    // Immediately start the next fetch (pipeline) before processing
+    const willContinue = result.nextCursor && page < maxPages;
+    if (willContinue && prefetchPages > 0) {
+      pendingFetch = new Promise<PageResult>((resolve, reject) => {
+        setTimeout(() => {
+          fetchPageWithRetry(csrfToken, result.nextCursor!, cookieHeader).then(resolve, reject);
+        }, delayMs);
+      });
     }
 
     const { merged, added } = mergeRecords(existing, result.records);
@@ -472,7 +490,11 @@ export async function syncBookmarksGraphQL(
     if (page % checkpointEvery === 0) await writeJsonLines(cachePath, existing);
 
     cursor = result.nextCursor;
-    if (page < maxPages) await new Promise((r) => setTimeout(r, delayMs));
+    // If prefetch is disabled, fetch synchronously with delay
+    if (prefetchPages <= 0 && willContinue) {
+      await new Promise((r) => setTimeout(r, delayMs));
+      pendingFetch = fetchPageWithRetry(csrfToken, cursor, cookieHeader);
+    }
   }
 
   if (stopReason === 'unknown') stopReason = page >= maxPages ? 'max pages reached' : 'unknown';

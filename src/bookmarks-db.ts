@@ -311,8 +311,10 @@ export async function buildIndex(options?: { force?: boolean }): Promise<{ dbPat
       db.run('COMMIT');
     }
 
-    // Rebuild FTS index from content table
-    db.run(`INSERT INTO bookmarks_fts(bookmarks_fts) VALUES('rebuild')`);
+    // Only rebuild FTS index if new records were inserted
+    if (newRecords.length > 0) {
+      db.run(`INSERT INTO bookmarks_fts(bookmarks_fts) VALUES('rebuild')`);
+    }
 
     saveDb(db, dbPath);
     const totalRows = db.exec('SELECT COUNT(*) FROM bookmarks')[0]?.values[0]?.[0] as number;
