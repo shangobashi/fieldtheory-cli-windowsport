@@ -82,36 +82,28 @@ export function showWelcome(): void {
 
 export async function showDashboard(): Promise<void> {
   console.log(LOGO);
-  try {
-    const view = await getBookmarkStatusView();
-    const ago = view.lastUpdated ? timeAgo(view.lastUpdated) : 'never';
-    console.log(`
+  const view = await getBookmarkStatusView();
+  const ago = view.lastUpdated ? timeAgo(view.lastUpdated) : 'never';
+  console.log(`
   \x1b[1m${view.bookmarkCount.toLocaleString()}\x1b[0m bookmarks  \x1b[2m\u2502\x1b[0m  last synced \x1b[1m${ago}\x1b[0m  \x1b[2m\u2502\x1b[0m  ${dataDir()}
 `);
 
-    if (fs.existsSync(twitterBookmarksIndexPath())) {
-      const counts = await getCategoryCounts();
-      const cats = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 7);
-      if (cats.length > 0) {
-        const catLine = cats.map(([c, n]) => `${c} (${n})`).join(' \u00b7 ');
-        console.log(`  \x1b[2m${catLine}\x1b[0m`);
-      }
+  if (fs.existsSync(twitterBookmarksIndexPath())) {
+    const counts = await getCategoryCounts();
+    const cats = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 7);
+    if (cats.length > 0) {
+      const catLine = cats.map(([c, n]) => `${c} (${n})`).join(' \u00b7 ');
+      console.log(`  \x1b[2m${catLine}\x1b[0m`);
     }
+  }
 
-    console.log(`
+  console.log(`
   \x1b[2mSync now:\x1b[0m     ftx sync
   \x1b[2mSearch:\x1b[0m       ftx search "query"
   \x1b[2mExplore:\x1b[0m      ftx viz
   \x1b[2mCheck setup:\x1b[0m  ftx doctor
   \x1b[2mAll commands:\x1b[0m  ftx --help
 `);
-  } catch {
-    console.log(`
-  Data: ${dataDir()}
-
-  Run: ftx sync
-`);
-  }
 }
 
 function timeAgo(dateStr: string): string {
@@ -661,22 +653,6 @@ export function buildCli() {
       });
       console.log(JSON.stringify(result, null, 2));
     }));
-
-  // ── hidden backward-compat aliases ────────────────────────────────────
-
-  const bookmarksAlias = program.command('bookmarks').description('(alias) Bookmark commands').helpOption(false);
-  for (const cmd of ['sync', 'search', 'list', 'show', 'stats', 'viz', 'classify', 'classify-domains',
-    'categories', 'domains', 'index', 'auth', 'status', 'path', 'doctor', 'sample', 'fetch-media']) {
-    bookmarksAlias.command(cmd).description(`Alias for: ftx ${cmd}`).allowUnknownOption(true)
-      .action(async () => {
-        const args = ['node', 'ftx', cmd, ...process.argv.slice(4)];
-        await program.parseAsync(args);
-      });
-  }
-  bookmarksAlias.command('enable').description('Alias for: ftx sync').action(async () => {
-    const args = ['node', 'ftx', 'sync', ...process.argv.slice(4)];
-    await program.parseAsync(args);
-  });
 
   return program;
 }

@@ -33,7 +33,7 @@ function detectChromeUserDataDir(): string | undefined {
 
 export function loadChromeSessionConfig(): ChromeSessionConfig {
   loadEnv();
-  const dir = process.env.FTX_CHROME_USER_DATA_DIR ?? process.env.FT_CHROME_USER_DATA_DIR ?? detectChromeUserDataDir();
+  const dir = process.env.FTX_CHROME_USER_DATA_DIR ?? detectChromeUserDataDir();
   if (!dir) {
     throw new Error(
       'Could not detect Chrome user-data directory.\n' +
@@ -42,15 +42,15 @@ export function loadChromeSessionConfig(): ChromeSessionConfig {
   }
   return {
     chromeUserDataDir: dir,
-    chromeProfileDirectory: process.env.FTX_CHROME_PROFILE_DIRECTORY ?? process.env.FT_CHROME_PROFILE_DIRECTORY ?? 'Default',
+    chromeProfileDirectory: process.env.FTX_CHROME_PROFILE_DIRECTORY ?? 'Default',
   };
 }
 
 export function loadXApiConfig() {
   loadEnv();
 
-  const apiKey = process.env.X_API_KEY ?? process.env.X_CONSUMER_KEY;
-  const apiSecret = process.env.X_API_SECRET ?? process.env.X_SECRET_KEY;
+  const apiKey = process.env.X_API_KEY;
+  const apiSecret = process.env.X_API_SECRET;
   const clientId = process.env.X_CLIENT_ID;
   const clientSecret = process.env.X_CLIENT_SECRET;
   const bearerToken = process.env.X_BEARER_TOKEN;

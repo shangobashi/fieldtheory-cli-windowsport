@@ -131,7 +131,7 @@ function parseResponse(raw: string, batchIds: Set<string>): LlmClassification[] 
 }
 
 function resolveEngineOrThrow(preference?: Engine | 'auto'): Engine {
-  const normalized = normalizeEnginePreference(preference ?? process.env.FTX_LLM_ENGINE ?? process.env.FT_LLM_ENGINE);
+  const normalized = normalizeEnginePreference(preference ?? process.env.FTX_LLM_ENGINE);
   const engine = detectEngine(normalized);
   if (engine) return engine;
 

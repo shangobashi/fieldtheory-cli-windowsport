@@ -3,7 +3,7 @@ import os from 'node:os';
 import fs from 'node:fs';
 
 export function dataDir(): string {
-  const override = process.env.FTX_DATA_DIR ?? process.env.FT_DATA_DIR;
+  const override = process.env.FTX_DATA_DIR;
   if (override) return override;
   return path.join(os.homedir(), '.ftx-bookmarks');
 }
