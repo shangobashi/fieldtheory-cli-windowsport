@@ -123,8 +123,7 @@ function initAnimations() {
     duration: 2.8,
     repeat: -1,
     yoyo: true,
-    ease: "sine.inOut",
-    transformOrigin: "left center"
+    ease: "none"
   });
 
   gsap.to(".footer-rule-beam", {
@@ -364,7 +363,7 @@ function initConstellation() {
       const dx = pointer.x - point.x;
       const dy = pointer.y - point.y;
       const distanceToPointer = Math.hypot(dx, dy) || 1;
-      const attraction = distanceToPointer < 180 ? 0.0008 : 0;
+      attraction = distanceToPointer < 180 ? 0.0008 : 0;
 
       point.vx += dx * attraction;
       point.vy += dy * attraction;

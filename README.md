@@ -159,6 +159,7 @@ If PowerShell blocks `npm`, use `npm.cmd adduser`, `npm.cmd whoami`, and `npm.cm
 
 ## License
 
-MIT.
 
-Original concept and product inspiration: **FieldTheory by Andrew Farah**.
+MIT License.
+
+Made by Shango Bashi from an original concept and product inspiration: **FieldTheory by Andrew Farah**.
