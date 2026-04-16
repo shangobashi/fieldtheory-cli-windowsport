@@ -112,7 +112,7 @@ export function decryptWindowsCookieValue(
   if (encryptedValue.length === 0) return '';
 
   const versionTag = encryptedValue.subarray(0, 3).toString('utf8');
-  if (versionTag === 'v10' || versionTag === 'v11') {
+  if (versionTag === 'v10' || versionTag === 'v11' || versionTag === 'v20') {
     const iv = encryptedValue.subarray(3, 15);
     const ciphertext = encryptedValue.subarray(15, encryptedValue.length - 16);
     const authTag = encryptedValue.subarray(encryptedValue.length - 16);
@@ -271,12 +271,14 @@ export async function extractChromeXCookies(
     );
   }
 
-  const dbPath = join(chromeUserDataDir, profileDirectory, 'Cookies');
   const key = os === 'darwin' ? getMacOSChromeKey() : getWindowsChromeMasterKey(chromeUserDataDir);
+  const dbPath = join(chromeUserDataDir, profileDirectory, 'Network', 'Cookies');
+  const fallbackDbPath = join(chromeUserDataDir, profileDirectory, 'Cookies');
+  const cookiePath = existsSync(dbPath) ? dbPath : fallbackDbPath;
 
-  let result = await queryCookies(dbPath, '.x.com', ['ct0', 'auth_token']);
+  let result = await queryCookies(cookiePath, '.x.com', ['ct0', 'auth_token']);
   if (result.cookies.length === 0) {
-    result = await queryCookies(dbPath, '.twitter.com', ['ct0', 'auth_token']);
+    result = await queryCookies(cookiePath, '.twitter.com', ['ct0', 'auth_token']);
   }
 
   const decrypted = new Map<string, string>();
