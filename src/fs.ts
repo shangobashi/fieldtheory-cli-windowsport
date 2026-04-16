@@ -13,7 +13,7 @@ export async function pathExists(filePath: string): Promise<boolean> {
   }
 }
 
-export async function listFiles(dirPath: string): Promise<string[]> {
+async function listFiles(dirPath: string): Promise<string[]> {
   try {
     return await readdir(dirPath);
   } catch {

@@ -191,7 +191,7 @@ async function queryVizData(): Promise<VizData> {
       try {
         const links = JSON.parse(row[0] as string) as string[];
         for (const link of links) {
-          const url = typeof link === 'string' ? link : (link as any).expanded_url ?? (link as any).url ?? '';
+          const url = typeof link === 'string' ? link : (link as { expanded_url?: string; url?: string }).expanded_url ?? (link as { expanded_url?: string; url?: string }).url ?? '';
           try {
             const domain = new URL(url).hostname.replace(/^www\./, '');
             if (domain && domain !== 'x.com' && domain !== 't.co') {

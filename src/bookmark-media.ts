@@ -5,7 +5,7 @@ import { ensureDir, pathExists, readJson, readJsonLines, writeJson } from './fs.
 import { bookmarkMediaDir, bookmarkMediaManifestPath, twitterBookmarksCachePath } from './paths.js';
 import type { BookmarkRecord } from './types.js';
 
-export interface MediaFetchEntry {
+interface MediaFetchEntry {
   bookmarkId: string;
   tweetId: string;
   tweetUrl: string;
@@ -20,7 +20,7 @@ export interface MediaFetchEntry {
   fetchedAt: string;
 }
 
-export interface MediaFetchManifest {
+interface MediaFetchManifest {
   schemaVersion: 1;
   generatedAt: string;
   limit: number;

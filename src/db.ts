@@ -9,7 +9,7 @@ let sqlPromise: Promise<SqlJsStatic> | undefined;
 
 function getSql(): Promise<SqlJsStatic> {
   if (!sqlPromise) {
-    const initSqlJs = require('sql.js-fts5') as (opts: any) => Promise<SqlJsStatic>;
+    const initSqlJs = require('sql.js-fts5') as (opts: { wasmBinary: Buffer }) => Promise<SqlJsStatic>;
     const wasmPath = require.resolve('sql.js-fts5/dist/sql-wasm.wasm');
     const wasmBinary = fs.readFileSync(wasmPath);
     sqlPromise = initSqlJs({ wasmBinary });
@@ -26,7 +26,7 @@ export async function openDb(filePath: string): Promise<Database> {
   return new SQL.Database();
 }
 
-export async function createDb(): Promise<Database> {
+async function createDb(): Promise<Database> {
   const SQL = await getSql();
   return new SQL.Database();
 }

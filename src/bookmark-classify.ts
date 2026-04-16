@@ -17,7 +17,7 @@
 
 import type { BookmarkRecord } from './types.js';
 
-export type BookmarkCategory =
+type BookmarkCategory =
   | 'tool'
   | 'security'
   | 'technique'

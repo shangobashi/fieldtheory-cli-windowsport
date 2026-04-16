@@ -4,7 +4,7 @@ import type { BookmarkCacheMeta, BookmarkRecord } from './types.js';
 import { loadXApiConfig } from './config.js';
 import { loadTwitterOAuthToken } from './xauth.js';
 
-export interface BookmarkSyncResult {
+interface BookmarkSyncResult {
   mode: 'full' | 'incremental';
   totalBookmarks: number;
   added: number;
@@ -49,7 +49,7 @@ function makeBookmark(record: Partial<BookmarkRecord> & Pick<BookmarkRecord, 'id
   };
 }
 
-async function fetchJsonWithUserToken(url: string, accessToken: string): Promise<{ ok: boolean; status: number; parsed: any; text: string }> {
+async function fetchJsonWithUserToken(url: string, accessToken: string): Promise<{ ok: boolean; status: number; parsed: unknown; text: string }> {
   const response = await fetch(url, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -58,7 +58,7 @@ async function fetchJsonWithUserToken(url: string, accessToken: string): Promise
   });
 
   const text = await response.text();
-  let parsed: any = null;
+  let parsed: unknown = null;
   try {
     parsed = JSON.parse(text);
   } catch {
@@ -83,7 +83,7 @@ async function fetchCurrentUserId(accessToken: string): Promise<{ ok: boolean; i
     };
   }
 
-  const id = result.parsed?.data?.id;
+  const id = (result.parsed as { data?: { id?: string } })?.data?.id;
   if (!id) {
     return {
       ok: false,

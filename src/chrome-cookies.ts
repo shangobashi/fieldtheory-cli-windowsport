@@ -8,7 +8,7 @@ import { openDb } from './db.js';
 
 const _masterKeyCache = new Map<string, Buffer>();
 
-export interface ChromeCookieResult {
+interface ChromeCookieResult {
   csrfToken: string;
   cookieHeader: string;
 }

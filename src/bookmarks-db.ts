@@ -1,4 +1,4 @@
-import type { Database } from 'sql.js';
+import type { Database, SqlValue } from 'sql.js';
 import { openDb, saveDb } from './db.js';
 import { readJsonLines } from './fs.js';
 import { twitterBookmarksCachePath, twitterBookmarksIndexPath } from './paths.js';
@@ -8,7 +8,7 @@ import type { ClassificationSummary } from './bookmark-classify.js';
 
 const SCHEMA_VERSION = 3;
 
-export interface SearchResult {
+interface SearchResult {
   id: string;
   url: string;
   text: string;
@@ -18,7 +18,7 @@ export interface SearchResult {
   score: number;
 }
 
-export interface SearchOptions {
+interface SearchOptions {
   query: string;
   author?: string;
   limit?: number;
@@ -26,7 +26,7 @@ export interface SearchOptions {
   after?: string;
 }
 
-export interface BookmarkTimelineItem {
+interface BookmarkTimelineItem {
   id: string;
   tweetId: string;
   url: string;
@@ -52,7 +52,7 @@ export interface BookmarkTimelineItem {
   viewCount?: number | null;
 }
 
-export interface BookmarkTimelineFilters {
+interface BookmarkTimelineFilters {
   query?: string;
   author?: string;
   after?: string;
@@ -332,7 +332,7 @@ export async function searchBookmarks(options: SearchOptions): Promise<SearchRes
 
   try {
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: SqlValue[] = [];
 
     if (options.query) {
       conditions.push(`b.rowid IN (SELECT rowid FROM bookmarks_fts WHERE bookmarks_fts MATCH ?)`);
@@ -451,7 +451,7 @@ export async function listBookmarks(
   }
 }
 
-export async function countBookmarks(
+async function countBookmarks(
   filters: BookmarkTimelineFilters = {},
 ): Promise<number> {
   const dbPath = twitterBookmarksIndexPath();
@@ -660,7 +660,7 @@ export async function classifyAndRebuild(): Promise<{
   return { ...buildResult, summary };
 }
 
-export interface CategorySample {
+interface CategorySample {
   id: string;
   url: string;
   text: string;
@@ -740,7 +740,7 @@ export async function getDomainCounts(): Promise<Record<string, number>> {
   }
 }
 
-export async function sampleByDomain(
+async function sampleByDomain(
   domain: string,
   limit: number,
 ): Promise<CategorySample[]> {

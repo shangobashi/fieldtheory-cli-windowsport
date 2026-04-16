@@ -23,7 +23,7 @@ interface LlmClassification {
   primary: string;
 }
 
-export type Engine = 'claude' | 'codex';
+type Engine = 'claude' | 'codex';
 
 const ENGINE_ORDER: Engine[] = ['codex', 'claude'];
 
@@ -151,7 +151,7 @@ function resolveEngineOrThrow(preference?: Engine | 'auto'): Engine {
   );
 }
 
-export interface LlmClassifyResult {
+interface LlmClassifyResult {
   engine: Engine;
   totalUnclassified: number;
   classified: number;

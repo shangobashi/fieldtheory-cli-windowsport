@@ -17,7 +17,7 @@ function createPkce() {
   return { verifier, challenge, state };
 }
 
-export function buildTwitterOAuthUrl(): { url: string; state: string; verifier: string } {
+function buildTwitterOAuthUrl(): { url: string; state: string; verifier: string } {
   const cfg = loadXApiConfig();
   if (!cfg.callbackUrl) {
     throw new Error('Missing X_CALLBACK_URL in .env.local');
@@ -76,7 +76,7 @@ async function exchangeCodeForToken(code: string, verifier: string): Promise<XOA
   };
 }
 
-export async function saveTwitterOAuthToken(token: XOAuthTokenSet): Promise<string> {
+async function saveTwitterOAuthToken(token: XOAuthTokenSet): Promise<string> {
   ensureDataDir();
   const tokenPath = twitterOauthTokenPath();
   await writeJson(tokenPath, token);

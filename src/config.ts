@@ -3,12 +3,12 @@ import path from 'node:path';
 import os from 'node:os';
 import { dataDir } from './paths.js';
 
-export interface ChromeSessionConfig {
+interface ChromeSessionConfig {
   chromeUserDataDir: string;
   chromeProfileDirectory?: string;
 }
 
-export function loadEnv(): void {
+function loadEnv(): void {
   const dir = dataDir();
   const candidatePaths = [
     path.join(process.cwd(), '.env.local'),

@@ -57,6 +57,6 @@ export function resolveCommandPath(command: string): string | null {
   return null;
 }
 
-export function isCommandAvailable(command: string): boolean {
+function isCommandAvailable(command: string): boolean {
   return resolveCommandPath(command) !== null;
 }

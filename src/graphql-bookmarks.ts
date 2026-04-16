@@ -11,6 +11,77 @@ const X_PUBLIC_BEARER =
 const BOOKMARKS_QUERY_ID = 'Z9GWmP0kP2dajyckAaDUBw';
 const BOOKMARKS_OPERATION = 'Bookmarks';
 
+// ── GraphQL tweet result types ──────────────────────────────────────────────
+
+interface VideoVariant {
+  content_type?: string;
+  bitrate?: number;
+  url?: string;
+}
+
+interface MediaEntity {
+  media_url_https?: string;
+  media_url?: string;
+  type?: string;
+  expanded_url?: string;
+  original_info?: { width?: number; height?: number };
+  ext_alt_text?: string;
+  video_info?: { variants?: VideoVariant[] };
+}
+
+interface UrlEntity {
+  expanded_url?: string;
+  url?: string;
+}
+
+interface TweetLegacy {
+  id_str?: string;
+  full_text?: string;
+  text?: string;
+  created_at?: string;
+  favorite_count?: number;
+  retweet_count?: number;
+  reply_count?: number;
+  quote_count?: number;
+  bookmark_count?: number;
+  conversation_id_str?: string;
+  in_reply_to_status_id_str?: string;
+  in_reply_to_user_id_str?: string;
+  quoted_status_id_str?: string;
+  lang?: string;
+  source?: string;
+  possibly_sensitive?: boolean;
+  entities?: { urls?: UrlEntity[]; media?: MediaEntity[] };
+  extended_entities?: { media?: MediaEntity[] };
+}
+
+interface TwitterUserResult {
+  rest_id?: string;
+  core?: { screen_name?: string; name?: string };
+  avatar?: { image_url?: string };
+  legacy?: {
+    screen_name?: string;
+    name?: string;
+    description?: string;
+    profile_image_url_https?: string;
+    profile_image_url?: string;
+    followers_count?: number;
+    friends_count?: number;
+    location?: string | { location?: string };
+    verified?: boolean;
+  };
+  is_blue_verified?: boolean;
+  location?: string | { location?: string };
+}
+
+interface TweetResult {
+  tweet?: TweetResult;
+  rest_id?: string;
+  legacy?: TweetLegacy;
+  core?: { user_results?: { result?: TwitterUserResult } };
+  views?: { count?: string | number };
+}
+
 const GRAPHQL_FEATURES = {
   graphql_timeline_v2_bookmark_timeline: true,
   rweb_tipjar_consumption_enabled: true,
@@ -35,7 +106,7 @@ const GRAPHQL_FEATURES = {
   responsive_web_media_download_video_enabled: false,
 };
 
-export interface SyncOptions {
+interface SyncOptions {
   /** Default true. Stop once we reach the newest already-stored bookmark. */
   incremental?: boolean;
   /** Max pages to fetch (20 bookmarks per page). Default: 500 */
@@ -73,7 +144,7 @@ export interface SyncProgress {
   stopReason?: string;
 }
 
-export interface SyncResult {
+interface SyncResult {
   added: number;
   totalBookmarks: number;
   pages: number;
@@ -161,7 +232,54 @@ interface PageResult {
   nextCursor?: string;
 }
 
-export function convertTweetToRecord(tweetResult: any, now: string): BookmarkRecord | null {
+interface TimelineEntry {
+  entryId?: string;
+  content?: {
+    value?: string;
+    itemContent?: {
+      tweet_results?: {
+        result?: TweetResult;
+      };
+    };
+  };
+}
+
+interface TimelineInstruction {
+  type?: string;
+  entries?: TimelineEntry[];
+}
+
+export function parseBookmarksResponse(json: unknown, now?: string): PageResult {
+  const ts = now ?? new Date().toISOString();
+  const response = json as { data?: { bookmark_timeline_v2?: { timeline?: { instructions?: TimelineInstruction[] } } } };
+  const instructions = response?.data?.bookmark_timeline_v2?.timeline?.instructions ?? [];
+  const entries: TimelineEntry[] = [];
+  for (const inst of instructions) {
+    if (inst.type === 'TimelineAddEntries' && Array.isArray(inst.entries)) {
+      entries.push(...inst.entries);
+    }
+  }
+
+  const records: BookmarkRecord[] = [];
+  let nextCursor: string | undefined;
+
+  for (const entry of entries) {
+    if (entry.entryId?.startsWith('cursor-bottom')) {
+      nextCursor = entry.content?.value;
+      continue;
+    }
+
+    const tweetResult = entry?.content?.itemContent?.tweet_results?.result;
+    if (!tweetResult) continue;
+
+    const record = convertTweetToRecord(tweetResult, ts);
+    if (record) records.push(record);
+  }
+
+  return { records, nextCursor };
+}
+
+export function convertTweetToRecord(tweetResult: TweetResult, now: string): BookmarkRecord | null {
   const tweet = tweetResult.tweet ?? tweetResult;
   const legacy = tweet?.legacy;
   if (!legacy) return null;
@@ -190,16 +308,18 @@ export function convertTweetToRecord(tweetResult: any, now: string): BookmarkRec
         location:
           typeof userResult?.location === 'object'
             ? userResult.location.location
-            : userResult?.legacy?.location,
+            : typeof userResult?.legacy?.location === 'object'
+              ? userResult.legacy.location.location
+              : userResult?.legacy?.location,
         snapshotAt: now,
       }
     : undefined;
 
   const mediaEntities = legacy?.extended_entities?.media ?? legacy?.entities?.media ?? [];
   const media: string[] = mediaEntities
-    .map((m: any) => m.media_url_https ?? m.media_url)
-    .filter(Boolean);
-  const mediaObjects = mediaEntities.map((m: any) => ({
+    .map((m: MediaEntity) => m.media_url_https ?? m.media_url)
+    .filter((url: string | undefined): url is string => Boolean(url));
+  const mediaObjects = mediaEntities.map((m: MediaEntity) => ({
     type: m.type,
     url: m.media_url_https ?? m.media_url,
     expandedUrl: m.expanded_url,
@@ -208,15 +328,15 @@ export function convertTweetToRecord(tweetResult: any, now: string): BookmarkRec
     altText: m.ext_alt_text,
     videoVariants: Array.isArray(m.video_info?.variants)
       ? m.video_info.variants
-          .filter((v: any) => v.content_type === 'video/mp4')
-          .map((v: any) => ({ bitrate: v.bitrate, url: v.url }))
+          .filter((v: VideoVariant) => v.content_type === 'video/mp4')
+          .map((v: VideoVariant) => ({ bitrate: v.bitrate, url: v.url }))
       : undefined,
   }));
 
   const urlEntities = legacy?.entities?.urls ?? [];
   const links: string[] = urlEntities
-    .map((u: any) => u.expanded_url)
-    .filter((u: string | undefined) => u && !u.includes('t.co'));
+    .map((u: UrlEntity) => u.expanded_url)
+    .filter((u: string | undefined): u is string => !!u && !u.includes('t.co'));
 
   return {
     id: tweetId,
@@ -251,35 +371,6 @@ export function convertTweetToRecord(tweetResult: any, now: string): BookmarkRec
     tags: [],
     ingestedVia: 'graphql',
   };
-}
-
-export function parseBookmarksResponse(json: any, now?: string): PageResult {
-  const ts = now ?? new Date().toISOString();
-  const instructions = json?.data?.bookmark_timeline_v2?.timeline?.instructions ?? [];
-  const entries: any[] = [];
-  for (const inst of instructions) {
-    if (inst.type === 'TimelineAddEntries' && Array.isArray(inst.entries)) {
-      entries.push(...inst.entries);
-    }
-  }
-
-  const records: BookmarkRecord[] = [];
-  let nextCursor: string | undefined;
-
-  for (const entry of entries) {
-    if (entry.entryId?.startsWith('cursor-bottom')) {
-      nextCursor = entry.content?.value;
-      continue;
-    }
-
-    const tweetResult = entry?.content?.itemContent?.tweet_results?.result;
-    if (!tweetResult) continue;
-
-    const record = convertTweetToRecord(tweetResult, ts);
-    if (record) records.push(record);
-  }
-
-  return { records, nextCursor };
 }
 
 async function fetchPageWithRetry(csrfToken: string, cursor?: string, cookieHeader?: string): Promise<PageResult> {

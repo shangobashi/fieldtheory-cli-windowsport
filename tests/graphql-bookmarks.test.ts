@@ -12,7 +12,13 @@ import type { BookmarkRecord } from '../src/types.js';
 
 const NOW = '2026-03-28T00:00:00.000Z';
 
-function makeTweetResult(overrides: Record<string, any> = {}) {
+interface TweetResultOverrides {
+  legacy?: Record<string, unknown>;
+  userResult?: Record<string, unknown>;
+  tweet?: Record<string, unknown>;
+}
+
+function makeTweetResult(overrides: TweetResultOverrides = {}) {
   return {
     rest_id: '1234567890',
     legacy: {
@@ -68,8 +74,8 @@ function makeTweetResult(overrides: Record<string, any> = {}) {
   };
 }
 
-function makeGraphQLResponse(tweetResults: any[], bottomCursor?: string) {
-  const entries = tweetResults.map((tr, i) => ({
+function makeGraphQLResponse(tweetResults: unknown[], bottomCursor?: string) {
+  const entries: Array<{ entryId: string; content: Record<string, unknown> }> = tweetResults.map((tr, i) => ({
     entryId: `tweet-${i}`,
     content: {
       itemContent: {
@@ -81,7 +87,7 @@ function makeGraphQLResponse(tweetResults: any[], bottomCursor?: string) {
   if (bottomCursor !== undefined) {
     entries.push({
       entryId: 'cursor-bottom-123',
-      content: { value: bottomCursor } as any,
+      content: { value: bottomCursor },
     });
   }
 
