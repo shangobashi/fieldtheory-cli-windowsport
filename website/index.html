@@ -279,7 +279,7 @@
             <p class="tiny-label">What changes in the fork</p>
             <strong>Windows cookies, Codex-friendly engine selection, separate local data dir.</strong>
             <ol>
-              <li>Direct Windows Chrome & Brave cookie extraction.</li>
+              <li>Direct Windows Chrome &amp; Brave cookie extraction.</li>
               <li>DevTools Protocol fallback for newer browsers.</li>
               <li>No external `sqlite3` requirement for sync.</li>
               <li>`ftx doctor` to verify the environment.</li>
@@ -296,6 +296,30 @@
               <li>Close Chrome or Brave and run `ftx sync`.</li>
               <li>Use `ftx search`, `ftx viz`, and `ftx stats` once synced.</li>
             </ol>
+          </article>
+
+          <article class="modal-card modal-card--devtools">
+            <p class="tiny-label">Brave &amp; newer Chrome</p>
+            <strong>DevTools Protocol fallback for v20 encryption.</strong>
+            <p class="devtools-desc">
+              When standard cookie extraction fails (v20 encryption), FieldTheory automatically falls back to Chrome's DevTools Protocol.
+            </p>
+            <div class="devtools-steps">
+              <p class="devtools-step-label">To enable:</p>
+              <ol>
+                <li>Start your browser with remote debugging:
+                  <div class="devtools-code">
+                    <span>brave.exe --remote-debugging-port=9222 --remote-allow-origins=*</span>
+                  </div>
+                </li>
+                <li>Log into x.com in the browser</li>
+                <li>Run `ftx sync` — it will use DevTools Protocol automatically</li>
+              </ol>
+            </div>
+            <p class="devtools-note">
+              <span class="devtools-icon">&#9888;</span>
+              This extracts cookies directly from the running browser — no decryption needed.
+            </p>
           </article>
         </div>
 
@@ -316,15 +340,6 @@
       <div class="footer-rule" aria-hidden="true">
         <span class="footer-rule-base"></span>
         <span class="footer-rule-beam"></span>
-      </div>
-      <div class="devtools-info" style="max-width: 600px; margin: 0 auto 2rem; text-align: center; opacity: 0.8;">
-        <p style="font-size: 0.85rem; line-height: 1.6;">
-          <strong>How Brave & newer Chrome support works:</strong><br>
-          When standard cookie extraction fails (v20 encryption), FieldTheory automatically falls back to 
-          Chrome's DevTools Protocol. Start your browser with 
-          <code style="background: rgba(255,255,255,0.1); padding: 0.1em 0.4em; border-radius: 3px;">--remote-debugging-port=9222</code> 
-          and FieldTheory will extract cookies directly from the running browser — no decryption needed.
-        </p>
       </div>
       <p>2026 MADE BY SHANGO BASHI</p>
     </footer>
