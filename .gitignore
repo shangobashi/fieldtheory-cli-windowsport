@@ -3,3 +3,8 @@ dist/
 *.js.map
 .env
 .env.local
+
+# Test files
+test_decrypt*.py
+extract_cookies.py
+__pycache__/

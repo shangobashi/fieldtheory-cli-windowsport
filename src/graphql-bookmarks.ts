@@ -2,11 +2,12 @@ import { ensureDir, readJsonLines, writeJsonLines, readJson, writeJson, pathExis
 import { ensureDataDir, twitterBookmarksCachePath, twitterBackfillStatePath } from './paths.js';
 import { loadChromeSessionConfig } from './config.js';
 import { extractChromeXCookies } from './chrome-cookies.js';
+import { extractCookiesViaDevTools, isDevToolsAvailable } from './devtools-cookies.js';
 import type { BookmarkBackfillState, BookmarkRecord, SyncProgress } from './types.js';
+import { exportBookmarksForSyncSeed } from './bookmarks-db.js';
 
 // Re-export SyncProgress for backward compatibility
 export type { SyncProgress } from './types.js';
-import { exportBookmarksForSyncSeed } from './bookmarks-db.js';
 
 const X_PUBLIC_BEARER =
   'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA';
@@ -476,19 +477,38 @@ export async function syncBookmarksGraphQL(
   const checkpointEvery = options.checkpointEvery ?? 25;
   const prefetchPages = options.prefetchPages ?? 1;
 
-  let csrfToken: string;
+  let csrfToken: string = '';
   let cookieHeader: string | undefined;
 
   if (options.csrfToken) {
     csrfToken = options.csrfToken;
     cookieHeader = options.cookieHeader;
   } else {
-    const chromeConfig = loadChromeSessionConfig();
-    const chromeDir = options.chromeUserDataDir ?? chromeConfig.chromeUserDataDir;
-    const chromeProfile = options.chromeProfileDirectory ?? chromeConfig.chromeProfileDirectory;
-    const cookies = await extractChromeXCookies(chromeDir, chromeProfile);
-    csrfToken = cookies.csrfToken;
-    cookieHeader = cookies.cookieHeader;
+    // Try standard cookie extraction first
+    let extracted = false;
+    try {
+      const chromeConfig = loadChromeSessionConfig();
+      const chromeDir = options.chromeUserDataDir ?? chromeConfig.chromeUserDataDir;
+      const chromeProfile = options.chromeProfileDirectory ?? chromeConfig.chromeProfileDirectory;
+      const cookies = await extractChromeXCookies(chromeDir, chromeProfile);
+      csrfToken = cookies.csrfToken;
+      cookieHeader = cookies.cookieHeader;
+      extracted = true;
+    } catch (error) {
+      // Standard extraction failed, try DevTools Protocol
+      const devtoolsAvailable = await isDevToolsAvailable();
+      if (devtoolsAvailable) {
+        const devtoolsCookies = await extractCookiesViaDevTools();
+        if (devtoolsCookies) {
+          csrfToken = devtoolsCookies.csrfToken;
+          cookieHeader = devtoolsCookies.cookieHeader;
+          extracted = true;
+        }
+      }
+      if (!extracted) {
+        throw error; // Re-throw the original error
+      }
+    }
   }
 
   ensureDataDir();

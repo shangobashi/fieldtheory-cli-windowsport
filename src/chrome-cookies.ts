@@ -3,10 +3,39 @@ import { existsSync, readFileSync, unlinkSync } from 'node:fs';
 import { promises as fsPromises } from 'node:fs';
 import { createDecipheriv, createHash, pbkdf2Sync, randomUUID } from 'node:crypto';
 import { join } from 'node:path';
-import { platform, tmpdir } from 'node:os';
+import { homedir, platform, tmpdir } from 'node:os';
 import { openDb } from './db.js';
 
 const _masterKeyCache = new Map<string, Buffer>();
+
+/** Detect default browser user data directory (Chrome or Brave). */
+export function detectBrowserDataDir(): { dir: string; browser: string } {
+  const os = platform();
+  const home = homedir();
+
+  const candidates: Array<{ dir: string; browser: string }> = os === 'win32'
+    ? [
+        { dir: join(process.env.LOCALAPPDATA || '', 'Google', 'Chrome', 'User Data'), browser: 'Chrome' },
+        { dir: join(process.env.LOCALAPPDATA || '', 'BraveSoftware', 'Brave-Browser', 'User Data'), browser: 'Brave' },
+      ]
+    : os === 'darwin'
+    ? [
+        { dir: join(home, 'Library', 'Application Support', 'Google', 'Chrome'), browser: 'Chrome' },
+        { dir: join(home, 'Library', 'Application Support', 'BraveSoftware', 'Brave-Browser'), browser: 'Brave' },
+      ]
+    : [];
+
+  for (const candidate of candidates) {
+    if (existsSync(join(candidate.dir, 'Local State'))) {
+      return candidate;
+    }
+  }
+
+  throw new Error(
+    'Could not find Chrome or Brave user data directory.\n' +
+    'Fix: Install Google Chrome or Brave Browser, open it at least once, and log into x.com.'
+  );
+}
 
 interface ChromeCookieResult {
   csrfToken: string;
@@ -112,7 +141,7 @@ export function decryptWindowsCookieValue(
   if (encryptedValue.length === 0) return '';
 
   const versionTag = encryptedValue.subarray(0, 3).toString('utf8');
-  if (versionTag === 'v10' || versionTag === 'v11' || versionTag === 'v20') {
+  if (versionTag === 'v10' || versionTag === 'v11') {
     const iv = encryptedValue.subarray(3, 15);
     const ciphertext = encryptedValue.subarray(15, encryptedValue.length - 16);
     const authTag = encryptedValue.subarray(encryptedValue.length - 16);
@@ -129,6 +158,44 @@ export function decryptWindowsCookieValue(
     }
 
     return decrypted.toString('utf8');
+  }
+
+  // v20 format: version(3) + key_version(1) + IV(12) + ciphertext + auth_tag(16)
+  if (versionTag === 'v20') {
+    const keyVersion = encryptedValue[3];
+    const iv = encryptedValue.subarray(4, 16);
+    const ciphertext = encryptedValue.subarray(16, encryptedValue.length - 16);
+    const authTag = encryptedValue.subarray(encryptedValue.length - 16);
+
+    // Try decryption without AAD first
+    try {
+      const decipher = createDecipheriv('aes-256-gcm', masterKey, iv);
+      decipher.setAuthTag(authTag);
+      let decrypted = decipher.update(ciphertext);
+      decrypted = Buffer.concat([decrypted, decipher.final()]);
+
+      if (dbVersion >= 24 && decrypted.length > 32) {
+        const expectedHostHash = createHash('sha256').update(hostKey).digest();
+        if (decrypted.subarray(0, 32).equals(expectedHostHash)) {
+          decrypted = decrypted.subarray(32);
+        }
+      }
+
+      return decrypted.toString('utf8');
+    } catch {
+      // Try with key_version as AAD
+      try {
+        const decipher2 = createDecipheriv('aes-256-gcm', masterKey, iv);
+        decipher2.setAuthTag(authTag);
+        decipher2.setAAD(Buffer.from([keyVersion]));
+        let decrypted2 = decipher2.update(ciphertext);
+        decrypted2 = Buffer.concat([decrypted2, decipher2.final()]);
+        return decrypted2.toString('utf8');
+      } catch {
+        // Return empty on failure
+        return '';
+      }
+    }
   }
 
   return unprotectWindowsData(encryptedValue).toString('utf8');
@@ -259,7 +326,7 @@ async function queryCookies(
 }
 
 export async function extractChromeXCookies(
-  chromeUserDataDir: string,
+  chromeUserDataDir?: string,
   profileDirectory = 'Default'
 ): Promise<ChromeCookieResult> {
   const os = platform();
@@ -271,9 +338,17 @@ export async function extractChromeXCookies(
     );
   }
 
-  const key = os === 'darwin' ? getMacOSChromeKey() : getWindowsChromeMasterKey(chromeUserDataDir);
-  const dbPath = join(chromeUserDataDir, profileDirectory, 'Network', 'Cookies');
-  const fallbackDbPath = join(chromeUserDataDir, profileDirectory, 'Cookies');
+  // Auto-detect browser if no directory specified
+  let detectedBrowser = 'Chrome';
+  const resolvedDir = chromeUserDataDir ?? (() => {
+    const detected = detectBrowserDataDir();
+    detectedBrowser = detected.browser;
+    return detected.dir;
+  })();
+
+  const key = os === 'darwin' ? getMacOSChromeKey() : getWindowsChromeMasterKey(resolvedDir);
+  const dbPath = join(resolvedDir, profileDirectory, 'Network', 'Cookies');
+  const fallbackDbPath = join(resolvedDir, profileDirectory, 'Cookies');
   const cookiePath = existsSync(dbPath) ? dbPath : fallbackDbPath;
 
   let result = await queryCookies(cookiePath, '.x.com', ['ct0', 'auth_token']);
@@ -300,15 +375,15 @@ export async function extractChromeXCookies(
 
   if (!ct0) {
     throw new Error(
-      'No ct0 CSRF cookie found for x.com in Chrome.\n' +
-      'This means you are not logged into X in the selected Chrome profile.\n\n' +
+      `No ct0 CSRF cookie found for x.com in ${detectedBrowser}.\n` +
+      `This means you are not logged into X in the selected ${detectedBrowser} profile.\n\n` +
       'Fix:\n' +
-      '  1. Open Google Chrome\n' +
+      `  1. Open ${detectedBrowser}\n` +
       '  2. Go to https://x.com and log in\n' +
-      '  3. Close Chrome completely\n' +
+      `  3. Close ${detectedBrowser} completely\n` +
       '  4. Re-run this command\n\n' +
       (profileDirectory !== 'Default'
-        ? `Using Chrome profile: "${profileDirectory}"\n`
+        ? `Using ${detectedBrowser} profile: "${profileDirectory}"\n`
         : 'Using the Default Chrome profile. If your X login is in a different profile,\n' +
           'pass --chrome-profile-directory <name> (for example "Profile 1").\n')
     );

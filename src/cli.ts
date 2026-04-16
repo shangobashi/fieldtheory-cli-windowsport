@@ -75,7 +75,7 @@ export function showWelcome(): void {
 
   Get started:
 
-    1. Open Google Chrome and log into x.com
+    1. Open Google Chrome or Brave Browser and log into x.com
     2. Run: ftx sync
 
   Data will be stored at: ${dataDir()}
@@ -122,9 +122,9 @@ function timeAgo(dateStr: string): string {
 
 function showSyncWelcome(): void {
   console.log(`
-  Make sure Google Chrome is open and logged into x.com.
-  Your Chrome session is used to authenticate \u2014 no passwords
-  are stored or transmitted. On Windows, close Chrome before
+  Make sure Google Chrome or Brave Browser is open and logged into x.com.
+  Your browser session is used to authenticate \u2014 no passwords
+  are stored or transmitted. On Windows, close Chrome or Brave before
   syncing if the cookies database is locked.
 `);
 }
@@ -137,7 +137,7 @@ function requireData(): boolean {
 
   Get started:
 
-    1. Open Google Chrome and log into x.com
+    1. Open Google Chrome or Brave Browser and log into x.com
     2. Run: ftx sync
 `);
     process.exitCode = 1;
@@ -221,7 +221,7 @@ export function buildCli() {
   program
     .name('ftx')
     .description('FieldTheory for Windows by Shango Bashi. Sync, search, classify, and explore X/Twitter bookmarks locally.')
-    .version('0.2.0')
+    .version('0.3.0')
     .showHelpAfterError()
     .hook('preAction', () => {
       console.log(LOGO);
@@ -232,7 +232,7 @@ export function buildCli() {
   program
     .command('sync')
     .description('Sync bookmarks from X into your local database')
-    .option('--api', 'Use OAuth v2 API instead of Chrome session', false)
+    .option('--api', 'Use OAuth v2 API instead of browser session', false)
     .option('--full', 'Full crawl instead of incremental sync', false)
     .option('--classify', 'Classify new bookmarks with LLM after syncing', false)
     .option('--engine <engine>', 'Classification engine: auto, codex, claude', 'auto')
@@ -241,9 +241,9 @@ export function buildCli() {
     .option('--delay-ms <n>', 'Delay between requests in ms (default: 150)', (v: string) => Number(v), 150)
     .option('--max-minutes <n>', 'Max runtime in minutes', (v: string) => Number(v), 30)
     .option('--prefetch <n>', 'Pages to prefetch ahead (0 = disable pipeline)', (v: string) => Number(v), 1)
-    .option('--chrome-user-data-dir <path>', 'Chrome user-data directory')
-    .option('--chrome-profile-directory <name>', 'Chrome profile name')
-    .option('--csrf-token <token>', 'Direct CSRF token override (skips Chrome cookie extraction)')
+    .option('--chrome-user-data-dir <path>', 'Chrome or Brave user-data directory')
+    .option('--chrome-profile-directory <name>', 'Browser profile name')
+    .option('--csrf-token <token>', 'Direct CSRF token override (skips browser cookie extraction)')
     .option('--cookie-header <header>', 'Direct cookie header override (used with --csrf-token)')
     .action(async (options) => {
       const firstRun = isFirstRun();
@@ -313,12 +313,12 @@ export function buildCli() {
 
   To sync your bookmarks:
 
-    1. Open Google Chrome
+    1. Open Google Chrome or Brave Browser
     2. Go to x.com and make sure you're logged in
-    3. Close Chrome completely
+    3. Close the browser completely
     4. Run: ftx sync
 
-  If you use multiple Chrome profiles, specify which one:
+  If you use multiple browser profiles, specify which one:
     ftx sync --chrome-profile-directory "Profile 1"
 `);
         } else {
@@ -592,27 +592,30 @@ export function buildCli() {
 
   program
     .command('doctor')
-    .description('Check local Windows, Chrome, and LLM prerequisites')
+    .description('Check local Windows, Chrome/Brave, and LLM prerequisites')
     .action(safe(async () => {
       const engines = detectAvailableEngines();
-      let chromeDir = 'not detected';
-      let chromeStatus = 'unavailable';
+      let browserDir = 'not detected';
+      let browserName = 'none';
+      let browserStatus = 'unavailable';
 
       try {
         const config = loadChromeSessionConfig();
-        chromeDir = config.chromeUserDataDir;
-        chromeStatus = fs.existsSync(config.chromeUserDataDir)
+        browserDir = config.chromeUserDataDir;
+        browserName = config.browser;
+        browserStatus = fs.existsSync(config.chromeUserDataDir)
           ? `ok (${config.chromeProfileDirectory ?? 'Default'})`
           : 'configured path not found';
       } catch (error) {
-        chromeStatus = (error as Error).message.split('\n')[0] ?? 'unavailable';
+        browserStatus = (error as Error).message.split('\n')[0] ?? 'unavailable';
       }
 
       console.log(`Platform: ${process.platform}`);
       console.log(`Node: ${process.version}`);
       console.log(`Data directory: ${dataDir()}`);
-      console.log(`Chrome user data: ${chromeDir}`);
-      console.log(`Chrome status: ${chromeStatus}`);
+      console.log(`Browser detected: ${browserName}`);
+      console.log(`Browser user data: ${browserDir}`);
+      console.log(`Browser status: ${browserStatus}`);
       console.log(`LLM engines: ${engines.length ? engines.join(', ') : 'none found'}`);
       console.log('Project: FieldTheory for Windows by Shango Bashi');
     }));
