@@ -221,7 +221,7 @@ export function buildCli() {
   program
     .name('ftx')
     .description('FieldTheory for Windows by Shango Bashi. Sync, search, classify, and explore X/Twitter bookmarks locally.')
-    .version('0.3.0')
+    .version('0.4.0')
     .showHelpAfterError()
     .hook('preAction', () => {
       console.log(LOGO);
@@ -233,7 +233,8 @@ export function buildCli() {
     .command('sync')
     .description('Sync bookmarks from X into your local database')
     .option('--api', 'Use OAuth v2 API instead of browser session', false)
-    .option('--full', 'Full crawl instead of incremental sync', false)
+    .option('--incremental', 'Incremental sync (only fetch new bookmarks since last sync)', false)
+    .option('--full', 'Full crawl (deprecated: this is now the default)', false)
     .option('--classify', 'Classify new bookmarks with LLM after syncing', false)
     .option('--engine <engine>', 'Classification engine: auto, codex, claude', 'auto')
     .option('--max-pages <n>', 'Max pages to fetch', (v: string) => Number(v), 500)
@@ -268,7 +269,7 @@ export function buildCli() {
         } else {
           const startTime = Date.now();
           const result = await syncBookmarksGraphQL({
-            incremental: !Boolean(options.full),
+            incremental: Boolean(options.incremental),
             maxPages: Number(options.maxPages) || 500,
             targetAdds: typeof options.targetAdds === 'number' && !Number.isNaN(options.targetAdds) ? options.targetAdds : undefined,
             delayMs: Number(options.delayMs) || 150,

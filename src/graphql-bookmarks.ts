@@ -469,7 +469,7 @@ export function formatSyncResult(result: SyncResult): string {
 export async function syncBookmarksGraphQL(
   options: SyncOptions = {}
 ): Promise<SyncResult> {
-  const incremental = options.incremental ?? true;
+  const incremental = options.incremental ?? false;
   const maxPages = options.maxPages ?? 500;
   const delayMs = options.delayMs ?? 150;
   const maxMinutes = options.maxMinutes ?? 30;
