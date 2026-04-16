@@ -4,7 +4,7 @@ import { syncTwitterBookmarks } from './bookmarks.js';
 import { getBookmarkStatusView, formatBookmarkStatus } from './bookmarks-service.js';
 import { runTwitterOAuthFlow } from './xauth.js';
 import { syncBookmarksGraphQL } from './graphql-bookmarks.js';
-import type { SyncProgress } from './graphql-bookmarks.js';
+import type { SyncProgress } from './types.js';
 import { fetchBookmarkMediaBatch } from './bookmark-media.js';
 import {
   buildIndex,
@@ -19,7 +19,7 @@ import {
   getBookmarkById,
 } from './bookmarks-db.js';
 import { formatClassificationSummary } from './bookmark-classify.js';
-import { classifyWithLlm, classifyDomainsWithLlm, detectAvailableEngines } from './bookmark-classify-llm.js';
+import { classifyWithLlm, classifyDomainsWithLlm, detectAvailableEngines, normalizeEnginePreference } from './bookmark-classify-llm.js';
 import { loadChromeSessionConfig } from './config.js';
 import { renderViz } from './bookmarks-viz.js';
 import { dataDir, ensureDataDir, isFirstRun, twitterBookmarksIndexPath } from './paths.js';
@@ -58,9 +58,11 @@ const LOGO = `
    \x1b[2m\u2514\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2518\x1b[0m`;
 
 function selectedEngine(optionValue?: string): 'auto' | 'claude' | 'codex' {
-  const normalized = String(optionValue ?? 'auto').trim().toLowerCase();
-  if (normalized === 'claude' || normalized === 'codex') return normalized;
-  return 'auto';
+  try {
+    return normalizeEnginePreference(optionValue);
+  } catch {
+    return 'auto';
+  }
 }
 
 export function showWelcome(): void {

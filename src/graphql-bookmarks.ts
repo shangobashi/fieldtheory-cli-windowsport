@@ -2,7 +2,10 @@ import { ensureDir, readJsonLines, writeJsonLines, readJson, writeJson, pathExis
 import { ensureDataDir, twitterBookmarksCachePath, twitterBackfillStatePath } from './paths.js';
 import { loadChromeSessionConfig } from './config.js';
 import { extractChromeXCookies } from './chrome-cookies.js';
-import type { BookmarkBackfillState, BookmarkRecord } from './types.js';
+import type { BookmarkBackfillState, BookmarkRecord, SyncProgress } from './types.js';
+
+// Re-export SyncProgress for backward compatibility
+export type { SyncProgress } from './types.js';
 import { exportBookmarksForSyncSeed } from './bookmarks-db.js';
 
 const X_PUBLIC_BEARER =
@@ -133,15 +136,6 @@ interface SyncOptions {
   checkpointEvery?: number;
   /** Number of pages to prefetch ahead. Default: 1 (pipeline mode). Set to 0 to disable. */
   prefetchPages?: number;
-}
-
-export interface SyncProgress {
-  page: number;
-  totalFetched: number;
-  newAdded: number;
-  running: boolean;
-  done: boolean;
-  stopReason?: string;
 }
 
 interface SyncResult {

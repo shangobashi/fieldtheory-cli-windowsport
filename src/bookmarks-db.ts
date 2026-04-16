@@ -3,7 +3,7 @@ import { openDb, saveDb } from './db.js';
 import { readJsonLines } from './fs.js';
 import { twitterBookmarksCachePath, twitterBookmarksIndexPath } from './paths.js';
 import type { BookmarkRecord } from './types.js';
-import { classifyCorpus, formatClassificationSummary } from './bookmark-classify.js';
+import { classifyCorpus, extractGithubUrls, formatClassificationSummary } from './bookmark-classify.js';
 import type { ClassificationSummary } from './bookmark-classify.js';
 
 const SCHEMA_VERSION = 3;
@@ -233,11 +233,7 @@ function ensureMigrations(db: Database): void {
 }
 
 function insertRecord(db: Database, r: BookmarkRecord): void {
-  // Extract GitHub URLs (kept inline — no LLM needed for URL parsing)
-  const text = r.text ?? '';
-  const githubMatches = text.match(/github\.com\/[\w.-]+\/[\w.-]+/gi) ?? [];
-  const githubFromLinks = (r.links ?? []).filter((l) => /github\.com/i.test(l));
-  const githubUrls = [...new Set([...githubMatches.map((m) => `https://${m}`), ...githubFromLinks])];
+  const githubUrls = extractGithubUrls(r.text ?? '', r.links ?? []);
 
   db.run(
     `INSERT OR REPLACE INTO bookmarks VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
@@ -670,78 +666,37 @@ interface CategorySample {
   links?: string;
 }
 
-export async function sampleByCategory(
-  category: string,
-  limit: number,
-): Promise<CategorySample[]> {
+async function getFieldCounts(column: string): Promise<Record<string, number>> {
   const dbPath = twitterBookmarksIndexPath();
   const db = await openDb(dbPath);
+  ensureMigrations(db);
   try {
     const rows = db.exec(
-      `SELECT id, url, text, author_handle, categories, github_urls, links_json
-       FROM bookmarks
-       WHERE categories LIKE ?
-       ORDER BY RANDOM()
-       LIMIT ?`,
-      [`%${category}%`, limit]
+      `SELECT ${column}, COUNT(*) as c FROM bookmarks
+       WHERE ${column} IS NOT NULL
+       GROUP BY ${column} ORDER BY c DESC`
     );
-    if (!rows.length) return [];
-    return rows[0].values.map((r) => ({
-      id: r[0] as string,
-      url: r[1] as string,
-      text: r[2] as string,
-      authorHandle: (r[3] as string) ?? undefined,
-      categories: (r[4] as string) ?? '',
-      githubUrls: (r[5] as string) ?? undefined,
-      links: (r[6] as string) ?? undefined,
-    }));
+    const counts: Record<string, number> = {};
+    for (const row of rows[0]?.values ?? []) {
+      counts[row[0] as string] = row[1] as number;
+    }
+    return counts;
   } finally {
     db.close();
   }
 }
 
 export async function getCategoryCounts(): Promise<Record<string, number>> {
-  const dbPath = twitterBookmarksIndexPath();
-  const db = await openDb(dbPath);
-  ensureMigrations(db);
-  try {
-    const rows = db.exec(
-      `SELECT primary_category, COUNT(*) as c FROM bookmarks
-       WHERE primary_category IS NOT NULL
-       GROUP BY primary_category ORDER BY c DESC`
-    );
-    const counts: Record<string, number> = {};
-    for (const row of rows[0]?.values ?? []) {
-      counts[row[0] as string] = row[1] as number;
-    }
-    return counts;
-  } finally {
-    db.close();
-  }
+  return getFieldCounts('primary_category');
 }
 
 export async function getDomainCounts(): Promise<Record<string, number>> {
-  const dbPath = twitterBookmarksIndexPath();
-  const db = await openDb(dbPath);
-  ensureMigrations(db);
-  try {
-    const rows = db.exec(
-      `SELECT primary_domain, COUNT(*) as c FROM bookmarks
-       WHERE primary_domain IS NOT NULL
-       GROUP BY primary_domain ORDER BY c DESC`
-    );
-    const counts: Record<string, number> = {};
-    for (const row of rows[0]?.values ?? []) {
-      counts[row[0] as string] = row[1] as number;
-    }
-    return counts;
-  } finally {
-    db.close();
-  }
+  return getFieldCounts('primary_domain');
 }
 
-async function sampleByDomain(
-  domain: string,
+async function sampleByField(
+  column: string,
+  value: string,
   limit: number,
 ): Promise<CategorySample[]> {
   const dbPath = twitterBookmarksIndexPath();
@@ -751,10 +706,10 @@ async function sampleByDomain(
     const rows = db.exec(
       `SELECT id, url, text, author_handle, categories, github_urls, links_json
        FROM bookmarks
-       WHERE domains LIKE ?
+       WHERE ${column} LIKE ?
        ORDER BY RANDOM()
        LIMIT ?`,
-      [`%${domain}%`, limit]
+      [`%${value}%`, limit]
     );
     if (!rows.length) return [];
     return rows[0].values.map((r) => ({
@@ -769,6 +724,20 @@ async function sampleByDomain(
   } finally {
     db.close();
   }
+}
+
+export async function sampleByCategory(
+  category: string,
+  limit: number,
+): Promise<CategorySample[]> {
+  return sampleByField('categories', category, limit);
+}
+
+async function sampleByDomain(
+  domain: string,
+  limit: number,
+): Promise<CategorySample[]> {
+  return sampleByField('domains', domain, limit);
 }
 
 export function formatSearchResults(results: SearchResult[]): string {

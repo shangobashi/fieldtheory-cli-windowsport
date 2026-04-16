@@ -15,7 +15,10 @@
  * It runs over the full corpus in <1s and stores results in the SQLite index.
  */
 
-import type { BookmarkRecord } from './types.js';
+import type { BookmarkRecord, ClassificationSummary } from './types.js';
+
+// Re-export ClassificationSummary for backward compatibility
+export type { ClassificationSummary } from './types.js';
 
 type BookmarkCategory =
   | 'tool'
@@ -141,9 +144,16 @@ const COMMERCE_PATTERNS = [
   /\$\d+(\.\d{2})?\s*(off|USD|discount)/i,
 ];
 
-const GITHUB_URL_RE = /github\.com\/[\w.-]+\/[\w.-]+/gi;
 const URL_RE = /https?:\/\/[^\s)>\]]+/gi;
 const TCO_RE = /https?:\/\/t\.co\/\w+/gi;
+
+const GITHUB_URL_RE = /github\.com\/[\w.-]+\/[\w.-]+/gi;
+
+export function extractGithubUrls(text: string, links: string[]): string[] {
+  const githubMatches = text.match(GITHUB_URL_RE) ?? [];
+  const githubFromLinks = links.filter((l) => /github\.com/i.test(l));
+  return [...new Set([...githubMatches.map((m) => `https://${m}`), ...githubFromLinks])];
+}
 
 // ── Domains that indicate tool/project bookmarks ─────────────────────────
 const TOOL_DOMAINS = new Set([
@@ -186,9 +196,7 @@ export function classifyBookmark(bookmark: BookmarkRecord): ClassifyResult {
   const extractedUrls = [...new Set([...allLinks, ...textUrls])];
 
   // Extract GitHub URLs
-  const githubMatches = text.match(GITHUB_URL_RE) ?? [];
-  const githubFromLinks = allLinks.filter((l) => /github\.com/i.test(l));
-  const githubUrls = [...new Set([...githubMatches.map((m) => `https://${m}`), ...githubFromLinks])];
+  const githubUrls = extractGithubUrls(text, allLinks);
 
   // Get domains from all URLs
   const domains = extractedUrls
@@ -224,13 +232,6 @@ export function classifyBookmark(bookmark: BookmarkRecord): ClassifyResult {
 }
 
 // ── Classify entire corpus ───────────────────────────────────────────────
-
-export interface ClassificationSummary {
-  total: number;
-  classified: number;
-  unclassified: number;
-  byCategoryCount: Record<string, number>;
-}
 
 export function classifyCorpus(bookmarks: BookmarkRecord[]): {
   results: Map<string, ClassifyResult>;

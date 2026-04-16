@@ -89,3 +89,23 @@ export interface BookmarkBackfillState {
   lastSeenIds: string[];
   stopReason?: string;
 }
+
+// ── Sync types ─────────────────────────────────────────────────────────
+
+export interface SyncProgress {
+  page: number;
+  totalFetched: number;
+  newAdded: number;
+  running: boolean;
+  done: boolean;
+  stopReason?: string;
+}
+
+// ── Classification types ───────────────────────────────────────────────
+
+export interface ClassificationSummary {
+  total: number;
+  classified: number;
+  unclassified: number;
+  byCategoryCount: Record<string, number>;
+}
