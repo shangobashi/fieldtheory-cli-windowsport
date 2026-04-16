@@ -1,4 +1,4 @@
-# FieldTheory for Windows
+# FieldTheory v.0.2.0 for Windows
 
 FieldTheory for Windows is a Windows-focused fork inspired by **FieldTheory by Andrew Farah**.
 
