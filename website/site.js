@@ -1,416 +1,170 @@
-const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-document.addEventListener("DOMContentLoaded", () => {
-  initPointerGlow();
-  initConstellation();
-  initAnimations();
-  initInstallModal();
-});
-
-function initPointerGlow() {
-  const root = document.documentElement;
-
-  document.addEventListener("pointermove", (event) => {
-    root.style.setProperty("--pointer-x", `${event.clientX}px`);
-    root.style.setProperty("--pointer-y", `${event.clientY}px`);
-  });
-}
-
-function initAnimations() {
-  const gsap = window.gsap;
-  const ScrollTrigger = window.ScrollTrigger;
-
-  if (!gsap || prefersReducedMotion) {
-    return;
-  }
-
-  if (ScrollTrigger) {
-    gsap.registerPlugin(ScrollTrigger);
-  }
-
-  const intro = gsap.timeline({
-    defaults: { ease: "power3.out" }
-  });
-
-  intro
-    .from(".topbar", { y: -24, autoAlpha: 0, duration: 0.8 })
-    .from(".eyebrow", { y: 22, autoAlpha: 0, duration: 0.6 }, "-=0.45")
-    .from(
-      ".title-line > span",
-      {
-        yPercent: 120,
-        skewY: 5,
-        duration: 1.08,
-        stagger: 0.12,
-        ease: "power4.out"
-      },
-      "-=0.2"
-    )
-    .from(".lede", { y: 28, autoAlpha: 0, duration: 0.8 }, "-=0.58")
-    .from(".actions > *", { y: 24, autoAlpha: 0, stagger: 0.12, duration: 0.65 }, "-=0.5")
-    .from(".trust-row span", { y: 12, autoAlpha: 0, stagger: 0.08, duration: 0.42 }, "-=0.38")
-    .from(".scan-surface", { y: 36, autoAlpha: 0, rotateX: 8, duration: 1 }, "-=0.82")
-    .from(".float-note", { scale: 0.88, autoAlpha: 0, stagger: 0.1, duration: 0.6 }, "-=0.58");
-
-  gsap.to(".ambient-a", {
-    x: 48,
-    y: -20,
-    duration: 12,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut"
-  });
-
-  gsap.to(".ambient-b", {
-    x: -34,
-    y: 22,
-    duration: 14,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut"
-  });
-
-  gsap.to(".ambient-c", {
-    x: 12,
-    y: -24,
-    duration: 10,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut"
-  });
-
-  gsap.to(".hero-visual", {
-    y: -10,
-    duration: 5.6,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut"
-  });
-
-  gsap.to(".note-one", {
-    y: -16,
-    rotation: -4,
-    duration: 3.6,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut"
-  });
-
-  gsap.to(".note-two", {
-    y: 14,
-    rotation: 3,
-    duration: 4.2,
-    repeat: -1,
-    yoyo: true,
-    ease: "sine.inOut"
-  });
-
-  gsap.utils.toArray(".trust-row span").forEach((pill, index) => {
-    const amplitude = index % 2 === 0 ? 6 : -6;
-
-    gsap.to(pill, {
-      x: amplitude,
-      duration: 4.8 + index * 0.22,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut"
-    });
-  });
-
-  gsap.to(".scan-track span", {
-    scaleX: 1.18,
-    xPercent: 42,
-    duration: 2.8,
-    repeat: -1,
-    yoyo: true,
-    ease: "none"
-  });
-
-  gsap.to(".footer-rule-beam", {
-    xPercent: 470,
-    duration: 5.8,
-    repeat: -1,
-    ease: "none"
-  });
-
-  if (!ScrollTrigger) {
-    return;
-  }
-
-  gsap.utils.toArray("[data-reveal]").forEach((element) => {
-    gsap.from(element, {
-      y: 42,
-      autoAlpha: 0,
-      duration: 0.88,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: element,
-        start: "top 84%"
-      }
-    });
-  });
-
-  gsap.utils.toArray(".step").forEach((element, index) => {
-    gsap.from(element, {
-      y: 28,
-      autoAlpha: 0,
-      duration: 0.72,
-      delay: index * 0.06,
-      ease: "power3.out",
-      scrollTrigger: {
-        trigger: element,
-        start: "top 86%"
-      }
-    });
-  });
-
-  if (window.matchMedia("(pointer: fine)").matches) {
-    gsap.utils.toArray(".panel, .step, .install-card, .modal-card").forEach((element) => {
-      const card = element;
-
-      card.addEventListener("pointerenter", () => {
-        gsap.to(card, {
-          y: -8,
-          duration: 0.42,
-          ease: "power2.out",
-          overwrite: "auto"
-        });
-      });
-
-      card.addEventListener("pointermove", (event) => {
-        const bounds = card.getBoundingClientRect();
-        const offsetX = event.clientX - bounds.left;
-        const offsetY = event.clientY - bounds.top;
-        const rotateY = ((offsetX / bounds.width) - 0.5) * 5;
-        const rotateX = (0.5 - (offsetY / bounds.height)) * 5;
-
-        gsap.to(card, {
-          rotateX,
-          rotateY,
-          transformPerspective: 900,
-          transformOrigin: "center",
-          duration: 0.35,
-          ease: "power2.out",
-          overwrite: "auto"
-        });
-      });
-
-      card.addEventListener("pointerleave", () => {
-        gsap.to(card, {
-          y: 0,
-          rotateX: 0,
-          rotateY: 0,
-          duration: 0.6,
-          ease: "power3.out",
-          overwrite: "auto"
-        });
-      });
-    });
-  }
-}
-
-function initInstallModal() {
-  const modalShell = document.getElementById("installModal");
-  if (!(modalShell instanceof HTMLDivElement)) {
-    return;
-  }
-
-  const dialog = modalShell.querySelector(".install-modal");
-  const openers = Array.from(document.querySelectorAll("[data-open-install]"));
-  const closers = Array.from(modalShell.querySelectorAll("[data-close-install]"));
-  const gsap = window.gsap;
-
-  let active = false;
-
-  function openModal() {
-    if (active) {
-      return;
-    }
-
-    active = true;
-    modalShell.hidden = false;
-    modalShell.setAttribute("aria-hidden", "false");
-    document.body.classList.add("modal-open");
-    modalShell.scrollTop = 0;
-    if (dialog instanceof HTMLElement) {
-      dialog.scrollTop = 0;
-    }
-
-    if (gsap && dialog && !prefersReducedMotion) {
-      gsap.fromTo(
-        modalShell,
-        { autoAlpha: 0 },
-        { autoAlpha: 1, duration: 0.24, ease: "power2.out" }
-      );
-
-      gsap.fromTo(
-        dialog,
-        { y: 28, autoAlpha: 0, scale: 0.985 },
-        { y: 0, autoAlpha: 1, scale: 1, duration: 0.36, ease: "power3.out" }
-      );
-    }
-  }
-
-  function closeModal() {
-    if (!active) {
-      return;
-    }
-
-    active = false;
-
-    const finish = () => {
-      modalShell.hidden = true;
-      modalShell.setAttribute("aria-hidden", "true");
-      document.body.classList.remove("modal-open");
-    };
-
-    if (gsap && dialog && !prefersReducedMotion) {
-      gsap.to(dialog, {
-        y: 20,
-        autoAlpha: 0,
-        scale: 0.985,
-        duration: 0.2,
-        ease: "power2.in"
-      });
-
-      gsap.to(modalShell, {
-        autoAlpha: 0,
-        duration: 0.22,
-        ease: "power2.in",
-        onComplete: finish
-      });
-
-      return;
-    }
-
-    finish();
-  }
-
-  openers.forEach((button) => {
-    button.addEventListener("click", openModal);
-  });
-
-  closers.forEach((button) => {
-    button.addEventListener("click", closeModal);
-  });
-
-  document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") {
-      closeModal();
-    }
-  });
-}
-
-function initConstellation() {
-  const canvas = document.getElementById("constellation");
-  if (!(canvas instanceof HTMLCanvasElement)) {
-    return;
-  }
-
-  const context = canvas.getContext("2d");
-  if (!context) {
-    return;
-  }
-
-  if (prefersReducedMotion) {
-    canvas.style.opacity = "0.35";
-    return;
-  }
-
-  const pointer = {
-    x: window.innerWidth * 0.7,
-    y: window.innerHeight * 0.22
-  };
-
-  let width = 0;
-  let height = 0;
-  let points = [];
-
-  function makePoint() {
-    const velocity = 0.14 + Math.random() * 0.2;
-    const angle = Math.random() * Math.PI * 2;
-
-    return {
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: Math.cos(angle) * velocity,
-      vy: Math.sin(angle) * velocity,
-      radius: 1.3 + Math.random() * 2.1
-    };
-  }
-
-  function resize() {
-    width = window.innerWidth;
-    height = window.innerHeight;
-
-    const ratio = window.devicePixelRatio || 1;
-    canvas.width = width * ratio;
-    canvas.height = height * ratio;
-    canvas.style.width = `${width}px`;
-    canvas.style.height = `${height}px`;
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-
-    const count = Math.max(28, Math.min(54, Math.floor(width / 28)));
-    points = Array.from({ length: count }, makePoint);
-  }
-
-  function draw() {
-    context.clearRect(0, 0, width, height);
-
-    for (let i = 0; i < points.length; i += 1) {
-      const point = points[i];
-
-      const dx = pointer.x - point.x;
-      const dy = pointer.y - point.y;
-      const distanceToPointer = Math.hypot(dx, dy) || 1;
-      attraction = distanceToPointer < 180 ? 0.0008 : 0;
-
-      point.vx += dx * attraction;
-      point.vy += dy * attraction;
-      point.vx *= 0.992;
-      point.vy *= 0.992;
-      point.x += point.vx;
-      point.y += point.vy;
-
-      if (point.x < -40) point.x = width + 40;
-      if (point.x > width + 40) point.x = -40;
-      if (point.y < -40) point.y = height + 40;
-      if (point.y > height + 40) point.y = -40;
-
-      for (let j = i + 1; j < points.length; j += 1) {
-        const other = points[j];
-        const lx = other.x - point.x;
-        const ly = other.y - point.y;
-        const distance = Math.hypot(lx, ly);
-
-        if (distance > 150) {
-          continue;
-        }
-
-        context.strokeStyle = `rgba(199, 255, 94, ${0.12 - distance / 1800})`;
-        context.lineWidth = 1;
-        context.beginPath();
-        context.moveTo(point.x, point.y);
-        context.lineTo(other.x, other.y);
-        context.stroke();
-      }
-
-      context.fillStyle = "rgba(243, 246, 239, 0.78)";
-      context.beginPath();
-      context.arc(point.x, point.y, point.radius, 0, Math.PI * 2);
-      context.fill();
-    }
-
-    window.requestAnimationFrame(draw);
-  }
-
-  window.addEventListener("resize", resize);
-
-  document.addEventListener("pointermove", (event) => {
-    pointer.x = event.clientX;
-    pointer.y = event.clientY;
-  });
-
-  resize();
-  draw();
-}
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const finePointer = window.matchMedia("(pointer: fine)").matches;
+
+window.addEventListener("DOMContentLoaded", () => {
+  initPointerGlow();
+  initScrollState();
+  initReveal();
+  initHeroTilt();
+});
+
+function initPointerGlow() {
+  if (prefersReducedMotion) {
+    return;
+  }
+
+  const root = document.documentElement;
+  let currentX = window.innerWidth * 0.5;
+  let currentY = window.innerHeight * 0.14;
+  let targetX = currentX;
+  let targetY = currentY;
+  let frame = null;
+
+  function tick() {
+    currentX += (targetX - currentX) * 0.08;
+    currentY += (targetY - currentY) * 0.08;
+    root.style.setProperty("--pointer-x", `${currentX}px`);
+    root.style.setProperty("--pointer-y", `${currentY}px`);
+
+    if (Math.abs(targetX - currentX) > 0.2 || Math.abs(targetY - currentY) > 0.2) {
+      frame = window.requestAnimationFrame(tick);
+      return;
+    }
+
+    frame = null;
+  }
+
+  document.addEventListener("pointermove", (event) => {
+    targetX = event.clientX;
+    targetY = event.clientY;
+
+    if (!frame) {
+      frame = window.requestAnimationFrame(tick);
+    }
+  }, { passive: true });
+}
+
+function initScrollState() {
+  const setState = () => {
+    document.body.classList.toggle("is-scrolled", window.scrollY > 12);
+  };
+
+  setState();
+  window.addEventListener("scroll", setState, { passive: true });
+}
+
+function initReveal() {
+  const elements = Array.from(document.querySelectorAll("[data-reveal]"));
+
+  if (!elements.length) {
+    return;
+  }
+
+  if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+    elements.forEach((element) => element.classList.add("is-visible"));
+    return;
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        }
+
+        entry.target.classList.add("is-visible");
+        observer.unobserve(entry.target);
+      });
+    },
+    { threshold: 0.16, rootMargin: "0px 0px -8% 0px" }
+  );
+
+  elements.forEach((element) => observer.observe(element));
+}
+
+function initCopyChecksum() {
+  const button = document.querySelector("[data-copy-checksum]");
+  const checksum = document.querySelector("[data-checksum-value]");
+
+  if (!(button instanceof HTMLButtonElement) || !(checksum instanceof HTMLElement)) {
+    return;
+  }
+
+  const defaultLabel = button.textContent?.trim() || "Copy checksum";
+
+  button.addEventListener("click", async () => {
+    const value = checksum.textContent?.trim() || "";
+
+    try {
+      await navigator.clipboard.writeText(value);
+      button.textContent = "Copied";
+      button.setAttribute("aria-label", "Checksum copied to clipboard");
+    } catch {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(checksum);
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      document.execCommand("copy");
+      selection?.removeAllRanges();
+      button.textContent = "Copied";
+    }
+
+    window.setTimeout(() => {
+      button.textContent = defaultLabel;
+      button.setAttribute("aria-label", "Copy checksum to clipboard");
+    }, 1600);
+  });
+}
+
+function initHeroTilt() {
+  if (prefersReducedMotion || !finePointer) {
+    return;
+  }
+
+  const card = document.querySelector(".hero-visual");
+  if (!(card instanceof HTMLElement)) {
+    return;
+  }
+
+  let animate = null;
+  let rotateX = 0;
+  let rotateY = 0;
+  let targetX = 0;
+  let targetY = 0;
+
+  function tick() {
+    rotateX += (targetX - rotateX) * 0.08;
+    rotateY += (targetY - rotateY) * 0.08;
+    card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-1px)`;
+
+    if (Math.abs(targetX - rotateX) > 0.01 || Math.abs(targetY - rotateY) > 0.01) {
+      animate = window.requestAnimationFrame(tick);
+      return;
+    }
+
+    animate = null;
+  }
+
+  card.addEventListener("pointermove", (event) => {
+    const bounds = card.getBoundingClientRect();
+    const percentX = (event.clientX - bounds.left) / bounds.width;
+    const percentY = (event.clientY - bounds.top) / bounds.height;
+
+    targetY = (percentX - 0.5) * 4.8;
+    targetX = (0.5 - percentY) * 4.8;
+
+    if (!animate) {
+      animate = window.requestAnimationFrame(tick);
+    }
+  });
+
+  card.addEventListener("pointerleave", () => {
+    targetX = 0;
+    targetY = 0;
+
+    if (!animate) {
+      animate = window.requestAnimationFrame(tick);
+    }
+  });
+}
