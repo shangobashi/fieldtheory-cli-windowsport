@@ -1,8 +1,30 @@
+# dependencies / build
 node_modules/
 dist/
+build/
+coverage/
 *.js.map
+
+# env / secrets
 .env
 .env.local
+.env.*.local
+
+# local app data
+.ftx-bookmarks/
+oauth-token.json
+bookmarks.jsonl
+bookmarks.db
+bookmarks.db-*
+media/
+media-manifest.json
+
+# misc local artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
 
 # Test files
 test_decrypt*.py

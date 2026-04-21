@@ -201,12 +201,15 @@ export function decryptWindowsCookieValue(
   return unprotectWindowsData(encryptedValue).toString('utf8');
 }
 
-function runPowerShell(script: string): string {
+function runPowerShell(script: string, stdinData?: string): string {
+  const encodedCommand = Buffer.from(script, 'utf16le').toString('base64');
+
   return execFileSync(
     'powershell.exe',
-    ['-NoProfile', '-NonInteractive', '-Command', script],
+    ['-NoProfile', '-NonInteractive', '-EncodedCommand', encodedCommand],
     {
       encoding: 'utf8',
+      input: stdinData,
       stdio: ['pipe', 'pipe', 'pipe'],
       timeout: 15000,
     }
@@ -215,16 +218,21 @@ function runPowerShell(script: string): string {
 
 function unprotectWindowsData(data: Buffer): Buffer {
   const base64 = data.toString('base64');
+
   const script =
-    `Add-Type -AssemblyName System.Security; ` +
-    `$bytes = [Convert]::FromBase64String('${base64}'); ` +
-    `$plain = [System.Security.Cryptography.ProtectedData]::Unprotect(` +
-    `$bytes, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser); ` +
-    `[Convert]::ToBase64String($plain)`;
-  const output = runPowerShell(script);
+    'Add-Type -AssemblyName System.Security; ' +
+    '$b64 = [Console]::In.ReadToEnd().Trim(); ' +
+    '$bytes = [Convert]::FromBase64String($b64); ' +
+    '$plain = [System.Security.Cryptography.ProtectedData]::Unprotect(' +
+    '$bytes, $null, [System.Security.Cryptography.DataProtectionScope]::CurrentUser); ' +
+    '[Convert]::ToBase64String($plain)';
+
+  const output = runPowerShell(script, base64);
+
   if (!output) {
     throw new Error('Windows DPAPI returned an empty response while decrypting Chrome cookies.');
   }
+
   return Buffer.from(output, 'base64');
 }
 
@@ -281,8 +289,11 @@ async function queryCookies(
     queryPath = dbPath;
   }
 
-  const safeDomain = domain.replace(/'/g, "''");
-  const nameList = names.map((name) => `'${name.replace(/'/g, "''")}'`).join(', ');
+  if (names.length === 0) {
+    return { cookies: [], dbVersion: 0 };
+  }
+
+  const placeholders = names.map(() => '?').join(', ');
   const sql = `
     SELECT
       name,
@@ -290,29 +301,26 @@ async function queryCookies(
       hex(encrypted_value) AS encrypted_value_hex,
       value
     FROM cookies
-    WHERE host_key LIKE '%${safeDomain}' AND name IN (${nameList})
+    WHERE host_key LIKE ? AND name IN (${placeholders})
   `;
+
+  const params: Array<string> = [`%${domain}`, ...names];
 
   const db = await openDb(queryPath);
 
   try {
-    const cookieRows = db.exec(sql);
+    const cookieRows = db.exec(sql, params);
     const metaRows = db.exec("SELECT value FROM meta WHERE key = 'version' LIMIT 1");
     const dbVersion = Number(metaRows[0]?.values?.[0]?.[0] ?? 0);
+
     const cookies = (cookieRows[0]?.values ?? []).map((row) => ({
       name: String(row[0] ?? ''),
       hostKey: String(row[1] ?? ''),
       encryptedValueHex: String(row[2] ?? ''),
       value: String(row[3] ?? ''),
     }));
+
     return { cookies, dbVersion };
-  } catch (error) {
-    throw new Error(
-      `Could not read Chrome Cookies database.\n` +
-      `Path: ${dbPath}\n` +
-      `Error: ${(error as Error).message}\n` +
-      'Fix: If Chrome is open, close it and retry. The database may be locked.'
-    );
   } finally {
     db.close();
     if (queryPath === tempDbPath) {

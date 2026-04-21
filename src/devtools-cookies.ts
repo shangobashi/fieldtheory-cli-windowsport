@@ -30,6 +30,14 @@ interface CDPTarget {
   webSocketDebuggerUrl: string;
 }
 
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
 /**
  * Get list of browser targets from DevTools Protocol
  */
@@ -37,11 +45,28 @@ async function getTargets(port: number = 9222): Promise<CDPTarget[]> {
   return new Promise((resolve, reject) => {
     const req = http.get(`http://localhost:${port}/json/list`, (res) => {
       let data = '';
-      res.on('data', (chunk) => data += chunk);
+      res.on('data', (chunk) => { data += String(chunk); });
       res.on('end', () => {
         try {
-          resolve(JSON.parse(data));
-        } catch (e) {
+          const parsed: unknown = JSON.parse(data);
+          if (!Array.isArray(parsed)) {
+            reject(new Error('DevTools response was not an array'));
+            return;
+          }
+
+          const targets = parsed
+            .filter(isObject)
+            .map((item) => ({
+              id: asString(item.id),
+              title: asString(item.title),
+              url: asString(item.url),
+              type: asString(item.type),
+              webSocketDebuggerUrl: asString(item.webSocketDebuggerUrl),
+            }))
+            .filter((item): item is CDPTarget => Boolean(item.id && item.title && item.url && item.type && item.webSocketDebuggerUrl));
+
+          resolve(targets);
+        } catch {
           reject(new Error('Failed to parse DevTools response'));
         }
       });
@@ -61,11 +86,30 @@ async function createTab(url: string, port: number = 9222): Promise<CDPTarget> {
   return new Promise((resolve, reject) => {
     const req = http.request(`http://localhost:${port}/json/new?${url}`, { method: 'PUT' }, (res) => {
       let data = '';
-      res.on('data', (chunk) => data += chunk);
+      res.on('data', (chunk) => { data += String(chunk); });
       res.on('end', () => {
         try {
-          resolve(JSON.parse(data));
-        } catch (e) {
+          const parsed: unknown = JSON.parse(data);
+          if (!isObject(parsed)) {
+            reject(new Error('Failed to parse new tab response'));
+            return;
+          }
+
+          const target: CDPTarget = {
+            id: asString(parsed.id) ?? '',
+            title: asString(parsed.title) ?? '',
+            url: asString(parsed.url) ?? '',
+            type: asString(parsed.type) ?? '',
+            webSocketDebuggerUrl: asString(parsed.webSocketDebuggerUrl) ?? '',
+          };
+
+          if (!target.id || !target.webSocketDebuggerUrl) {
+            reject(new Error('New tab response missing required fields'));
+            return;
+          }
+
+          resolve(target);
+        } catch {
           reject(new Error('Failed to parse new tab response'));
         }
       });
@@ -79,40 +123,58 @@ async function createTab(url: string, port: number = 9222): Promise<CDPTarget> {
  * Get cookies from a browser target using DevTools Protocol
  */
 async function getCookiesFromTarget(webSocketUrl: string): Promise<CDPCookie[]> {
-  // Use import for ws in ES module context
-  const ws: any = await import('ws');
-  const WebSocket = ws.default || ws.WebSocket || ws;
+  const wsModule = await import('ws');
+  const WebSocket = wsModule.default ?? wsModule.WebSocket;
+  if (!WebSocket) {
+    throw new Error('WebSocket implementation unavailable');
+  }
 
   return new Promise((resolve, reject) => {
     const wsInstance = new WebSocket(webSocketUrl);
     let messageId = 1;
+    let settled = false;
+    let timeoutHandle: ReturnType<typeof setTimeout>;
+    const finish = (err?: Error, cookies?: CDPCookie[]) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutHandle);
+      wsInstance.close();
+      if (err) reject(err);
+      else resolve(cookies ?? []);
+    };
 
     wsInstance.on('open', () => {
       wsInstance.send(JSON.stringify({
         id: messageId++,
-        method: 'Network.getAllCookies'
+        method: 'Network.getAllCookies',
       }));
     });
 
-    wsInstance.on('message', (data: Buffer) => {
+    wsInstance.on('message', (data: unknown) => {
       try {
-        const response = JSON.parse(data.toString());
-        if (response.result?.cookies) {
-          wsInstance.close();
-          resolve(response.result.cookies);
-        }
-      } catch (e) {
-        reject(new Error('Failed to parse cookie response'));
+        const text = typeof data === 'string'
+          ? data
+          : Buffer.isBuffer(data)
+            ? data.toString('utf8')
+            : ArrayBuffer.isView(data)
+              ? Buffer.from(data.buffer, data.byteOffset, data.byteLength).toString('utf8')
+              : String(data);
+        const response: unknown = JSON.parse(text);
+        if (!isObject(response)) return;
+        const result = response.result;
+        if (!isObject(result) || !Array.isArray(result.cookies)) return;
+        finish(undefined, result.cookies as CDPCookie[]);
+      } catch {
+        finish(new Error('Failed to parse cookie response'));
       }
     });
 
     wsInstance.on('error', (err: Error) => {
-      reject(new Error(`WebSocket error: ${err.message}`));
+      finish(new Error(`WebSocket error: ${err.message}`));
     });
 
-    setTimeout(() => {
-      wsInstance.close();
-      reject(new Error('DevTools Protocol request timeout'));
+    timeoutHandle = setTimeout(() => {
+      finish(new Error('DevTools Protocol request timeout'));
     }, 10000);
   });
 }
@@ -161,20 +223,21 @@ export async function extractCookiesViaDevTools(
     return {
       csrfToken: ct0.value,
       cookieHeader: cookieParts.join('; '),
-      browser: 'DevTools Protocol'
+      browser: 'Chrome/Brave via DevTools Protocol',
     };
   } catch (error) {
+    // DevTools Protocol extraction failed - return null and let caller fallback to DB or OAuth
+    if (process.env.FTX_DEBUG) {
+      console.error('DevTools Protocol extraction failed:', error);
+    }
     return null;
   }
 }
 
-/**
- * Check if DevTools Protocol is available
- */
 export async function isDevToolsAvailable(port: number = 9222): Promise<boolean> {
   try {
-    await getTargets(port);
-    return true;
+    const targets = await getTargets(port);
+    return targets.length > 0;
   } catch {
     return false;
   }

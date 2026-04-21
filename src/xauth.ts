@@ -1,9 +1,11 @@
 import crypto from 'node:crypto';
 import http from 'node:http';
+import { chmod } from 'node:fs/promises';
 import { URL } from 'node:url';
 import { pathExists, readJson, writeJson } from './fs.js';
 import { ensureDataDir, twitterOauthTokenPath } from './paths.js';
 import { loadXApiConfig } from './config.js';
+import { restrictWindowsAcl } from './windows-acl.js';
 import type { XOAuthTokenSet } from './types.js';
 
 function base64Url(input: Buffer): string {
@@ -36,6 +38,14 @@ function buildTwitterOAuthUrl(): { url: string; state: string; verifier: string 
   return { url: url.toString(), state, verifier };
 }
 
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
 async function exchangeCodeForToken(code: string, verifier: string): Promise<XOAuthTokenSet> {
   const cfg = loadXApiConfig();
   if (!cfg.callbackUrl) {
@@ -61,17 +71,36 @@ async function exchangeCodeForToken(code: string, verifier: string): Promise<XOA
   });
 
   const text = await response.text();
-  const parsed = JSON.parse(text);
+  const parsed: unknown = JSON.parse(text);
   if (!response.ok) {
     throw new Error(`Token exchange failed (HTTP ${response.status}). Check your X API credentials.`);
   }
 
+  if (!isObject(parsed)) {
+    throw new Error('Token exchange response was not a JSON object.');
+  }
+
+  const accessToken = asString(parsed.access_token);
+  if (!accessToken) {
+    throw new Error('Token exchange response missing access_token.');
+  }
+
+  const tokenType = asString(parsed.token_type);
+  const refreshToken = asString(parsed.refresh_token);
+  const scope = asString(parsed.scope);
+  const expiresInRaw = parsed.expires_in;
+  const expiresIn = typeof expiresInRaw === 'number'
+    ? expiresInRaw
+    : typeof expiresInRaw === 'string' && expiresInRaw.trim() !== ''
+      ? Number(expiresInRaw)
+      : undefined;
+
   return {
-    access_token: parsed.access_token,
-    refresh_token: parsed.refresh_token,
-    expires_in: parsed.expires_in,
-    scope: parsed.scope,
-    token_type: parsed.token_type,
+    access_token: accessToken,
+    refresh_token: refreshToken,
+    expires_in: Number.isFinite(expiresIn) ? expiresIn : undefined,
+    scope,
+    token_type: tokenType,
     obtained_at: new Date().toISOString(),
   };
 }
@@ -80,9 +109,21 @@ async function saveTwitterOAuthToken(token: XOAuthTokenSet): Promise<string> {
   ensureDataDir();
   const tokenPath = twitterOauthTokenPath();
   await writeJson(tokenPath, token);
-  // Restrict permissions — OAuth tokens should only be readable by the owner
-  const { chmod } = await import('node:fs/promises');
-  await chmod(tokenPath, 0o600);
+
+  if (process.platform === 'win32') {
+    try {
+      restrictWindowsAcl(tokenPath, false);
+    } catch (error) {
+      process.stderr.write(
+        `Warning: could not restrict ACL on OAuth token file: ${
+          error instanceof Error ? error.message : String(error)
+        }\n`
+      );
+    }
+  } else {
+    await chmod(tokenPath, 0o600);
+  }
+
   return tokenPath;
 }
 
@@ -104,9 +145,24 @@ export async function runTwitterOAuthFlow(): Promise<{ tokenPath: string; scope?
   const pathname = callback.pathname;
 
   const code = await new Promise<string>((resolve, reject) => {
-    const server = http.createServer((req, res) => {
+    let settled = false;
+    let timeoutHandle: ReturnType<typeof setTimeout>;
+    let server: http.Server;
+
+    const finish = (err?: Error, value?: string) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeoutHandle);
+      server.close(() => {
+        if (err) reject(err);
+        else resolve(value!);
+      });
+    };
+
+    server = http.createServer((req, res) => {
       try {
         const reqUrl = new URL(req.url ?? '/', `http://127.0.0.1:${port}`);
+
         if (reqUrl.pathname !== pathname) {
           res.statusCode = 404;
           res.end('Not found');
@@ -120,28 +176,32 @@ export async function runTwitterOAuthFlow(): Promise<{ tokenPath: string; scope?
         if (error) {
           res.statusCode = 400;
           res.end(`OAuth error: ${error}`);
-          server.close();
-          reject(new Error(`OAuth error: ${error}`));
+          finish(new Error(`OAuth error: ${error}`));
           return;
         }
 
         if (!returnedCode || returnedState !== state) {
           res.statusCode = 400;
           res.end('Invalid OAuth callback');
-          server.close();
-          reject(new Error('Invalid OAuth callback state/code'));
+          finish(new Error('Invalid OAuth callback state/code'));
           return;
         }
 
         res.statusCode = 200;
-      res.end('ftx auth complete. You can close this tab.');
-        server.close();
-        resolve(returnedCode);
+        res.end('ftx auth complete. You can close this tab.');
+        finish(undefined, returnedCode);
       } catch (err) {
-        server.close();
-        reject(err);
+        finish(err instanceof Error ? err : new Error(String(err)));
       }
     });
+
+    server.once('error', (err) => {
+      finish(err instanceof Error ? err : new Error(String(err)));
+    });
+
+    timeoutHandle = setTimeout(() => {
+      finish(new Error('OAuth flow timed out after 5 minutes. Please try again.'));
+    }, 5 * 60 * 1000);
 
     server.listen(port, '127.0.0.1', () => {
       console.log('Open this URL in your browser to authorize X bookmarks access:');

@@ -9,8 +9,13 @@ import { exportBookmarksForSyncSeed } from './bookmarks-db.js';
 // Re-export SyncProgress for backward compatibility
 export type { SyncProgress } from './types.js';
 
-const X_PUBLIC_BEARER =
+const DEFAULT_X_PUBLIC_BEARER =
   'AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA';
+
+function getPublicBearer(): string {
+  const configured = process.env.X_PUBLIC_BEARER?.trim();
+  return configured || DEFAULT_X_PUBLIC_BEARER;
+}
 
 const BOOKMARKS_QUERY_ID = 'Z9GWmP0kP2dajyckAaDUBw';
 const BOOKMARKS_OPERATION = 'Bookmarks';
@@ -212,7 +217,7 @@ function buildHeaders(csrfToken: string, cookieHeader?: string): Record<string, 
     ? 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36'
     : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36';
   return {
-    authorization: `Bearer ${X_PUBLIC_BEARER}`,
+    authorization: `Bearer ${getPublicBearer()}`,
     'x-csrf-token': csrfToken,
     'x-twitter-auth-type': 'OAuth2Session',
     'x-twitter-active-user': 'yes',
@@ -244,13 +249,39 @@ interface TimelineInstruction {
   entries?: TimelineEntry[];
 }
 
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
 export function parseBookmarksResponse(json: unknown, now?: string): PageResult {
   const ts = now ?? new Date().toISOString();
-  const response = json as { data?: { bookmark_timeline_v2?: { timeline?: { instructions?: TimelineInstruction[] } } } };
-  const instructions = response?.data?.bookmark_timeline_v2?.timeline?.instructions ?? [];
+  if (!isObject(json)) {
+    return { records: [], nextCursor: undefined };
+  }
+
+  const data = json.data;
+  if (!isObject(data)) {
+    return { records: [], nextCursor: undefined };
+  }
+
+  const bookmarkTimelineV2 = data.bookmark_timeline_v2;
+  if (!isObject(bookmarkTimelineV2)) {
+    return { records: [], nextCursor: undefined };
+  }
+
+  const timeline = bookmarkTimelineV2.timeline;
+  if (!isObject(timeline)) {
+    return { records: [], nextCursor: undefined };
+  }
+
+  const instructions = Array.isArray(timeline.instructions) ? timeline.instructions : [];
   const entries: TimelineEntry[] = [];
   for (const inst of instructions) {
-    if (inst.type === 'TimelineAddEntries' && Array.isArray(inst.entries)) {
+    if (inst?.type === 'TimelineAddEntries' && Array.isArray(inst.entries)) {
       entries.push(...inst.entries);
     }
   }

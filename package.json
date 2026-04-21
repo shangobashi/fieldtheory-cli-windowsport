@@ -1,6 +1,6 @@
 {
   "name": "fieldtheory-cli-windowsport",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "FieldTheory for Windows. Inspired by Andrew Farah's Field Theory CLI for local X/Twitter bookmark sync, search, and classification.",
   "type": "module",
   "bin": {

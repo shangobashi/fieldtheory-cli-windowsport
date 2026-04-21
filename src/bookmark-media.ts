@@ -5,6 +5,57 @@ import { ensureDir, pathExists, readJson, readJsonLines, writeJson } from './fs.
 import { bookmarkMediaDir, bookmarkMediaManifestPath, twitterBookmarksCachePath } from './paths.js';
 import type { BookmarkRecord } from './types.js';
 
+const ALLOWED_MEDIA_HOSTNAMES = new Set([
+  'pbs.twimg.com',
+  'video.twimg.com',
+  'ton.twimg.com',
+  'abs.twimg.com',
+]);
+
+export function validateMediaUrl(raw: string): URL {
+  let parsed: URL;
+
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error(`Invalid media URL: ${raw}`);
+  }
+
+  if (parsed.protocol !== 'https:') {
+    throw new Error(`Media URL must use HTTPS: ${raw}`);
+  }
+
+  if (parsed.username || parsed.password) {
+    throw new Error(`Media URL must not include credentials: ${raw}`);
+  }
+
+  if (parsed.port && parsed.port !== '443') {
+    throw new Error(`Media URL must not use a custom port: ${raw}`);
+  }
+
+  if (!ALLOWED_MEDIA_HOSTNAMES.has(parsed.hostname)) {
+    throw new Error(`Media URL hostname not allowed: ${parsed.hostname}`);
+  }
+
+  return parsed;
+}
+
+async function safeFetchMedia(raw: string, init: RequestInit = {}): Promise<Response> {
+  const url = validateMediaUrl(raw);
+
+  const response = await fetch(url, {
+    ...init,
+    redirect: 'manual',
+    signal: AbortSignal.timeout(15_000),
+  });
+
+  if (response.status >= 300 && response.status < 400) {
+    throw new Error(`Redirects are not allowed for media fetches: ${raw}`);
+  }
+
+  return response;
+}
+
 interface MediaFetchEntry {
   bookmarkId: string;
   tweetId: string;
@@ -99,12 +150,32 @@ export async function fetchBookmarkMediaBatch(
     for (const sourceUrl of mediaUrls) {
       const key = `${bookmark.id}::${sourceUrl}`;
       if (priorKeys.has(key)) continue;
-      processed += 1;
 
       const fetchedAt = new Date().toISOString();
+      let validatedUrl: URL;
 
       try {
-        const head = await fetch(sourceUrl, { method: 'HEAD' });
+        validatedUrl = validateMediaUrl(sourceUrl);
+      } catch (error) {
+        entries.push({
+          bookmarkId: bookmark.id,
+          tweetId: bookmark.tweetId,
+          tweetUrl: bookmark.url,
+          authorHandle: bookmark.authorHandle,
+          authorName: bookmark.authorName,
+          sourceUrl,
+          status: 'failed',
+          reason: error instanceof Error ? error.message : String(error),
+          fetchedAt,
+        });
+        failed += 1;
+        continue;
+      }
+
+      processed += 1;
+
+      try {
+        const head = await safeFetchMedia(validatedUrl.toString(), { method: 'HEAD' });
         const contentLengthHeader = head.headers.get('content-length');
         const contentType = head.headers.get('content-type') ?? undefined;
         const declaredBytes = contentLengthHeader ? Number(contentLengthHeader) : undefined;
@@ -127,7 +198,7 @@ export async function fetchBookmarkMediaBatch(
           continue;
         }
 
-        const response = await fetch(sourceUrl);
+        const response = await safeFetchMedia(validatedUrl.toString());
         if (!response.ok) {
           entries.push({
             bookmarkId: bookmark.id,
@@ -164,7 +235,7 @@ export async function fetchBookmarkMediaBatch(
         }
 
         const digest = createHash('sha256').update(buffer).digest('hex').slice(0, 16);
-        const ext = sanitizeExtFromContentType(response.headers.get('content-type') ?? contentType ?? undefined, sourceUrl);
+        const ext = sanitizeExtFromContentType(response.headers.get('content-type') ?? contentType ?? undefined, validatedUrl.toString());
         const filename = `${bookmark.tweetId}-${digest}${ext}`;
         const localPath = path.join(mediaDir, filename);
         await writeFile(localPath, buffer);

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import os from 'node:os';
 import fs from 'node:fs';
+import { restrictWindowsAcl } from './windows-acl.js';
 
 export function dataDir(): string {
   const override = process.env.FTX_DATA_DIR;
@@ -10,7 +11,19 @@ export function dataDir(): string {
 
 function ensureDirSync(dir: string): void {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true });
+    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+  }
+
+  if (process.platform === 'win32') {
+    try {
+      restrictWindowsAcl(dir, true);
+    } catch (error) {
+      process.stderr.write(
+        `Warning: could not restrict ACL on data directory: ${
+          error instanceof Error ? error.message : String(error)
+        }\n`
+      );
+    }
   }
 }
 
