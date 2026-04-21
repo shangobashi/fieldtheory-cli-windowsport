@@ -3,10 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta
-      name="description"
-      content="FieldTheory for Windows v0.4.1 keeps bookmarks local, searchable, and off the cloud."
-    />
+    <meta name="description" content="FieldTheory for Windows v0.4.1 keeps bookmarks local, searchable, and off the cloud." />
     <meta name="theme-color" content="#070708" />
     <title>FieldTheory for Windows v0.4.1</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -16,6 +13,9 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./site.css" />
+    <script defer src="./vendor/three.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script defer src="./site.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#content">Skip to content</a>
@@ -73,6 +73,14 @@
           </div>
 
           <aside class="dossier" aria-label="Release summary">
+            <div class="scene-stage" data-scene>
+              <div class="scene-hud">
+                <span>3D archive field</span>
+                <span>drag / hover</span>
+              </div>
+              <div class="scene-caption">Field theory, rendered as a living object.</div>
+            </div>
+
             <div class="dossier-head">
               <span class="micro-label">Current release</span>
               <span class="release-badge">v0.4.1</span>
@@ -272,7 +280,5 @@ ftx search "ai memory"</code></pre>
         <a href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">GitHub</a>
       </footer>
     </div>
-
-    <script src="./site.js"></script>
   </body>
 </html>

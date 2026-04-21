@@ -30,3 +30,4 @@ Thumbs.db
 test_decrypt*.py
 extract_cookies.py
 __pycache__/
+.vercel
