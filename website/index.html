@@ -4,11 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="FieldTheory for Windows v0.4.1 keeps bookmarks local, searchable, and off the cloud." />
-    <meta name="theme-color" content="#040508" />
+    <meta name="theme-color" content="#030406" />
     <title>FieldTheory for Windows v0.4.1</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./site.css" />
     <script defer src="./vendor/three.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -49,25 +46,28 @@
 
       <main id="content">
         <section class="hero frame-line" id="top" data-reveal>
-          <div class="hero-artifact-shell">
-            <div class="artifact-stage" data-scene>
-              <div class="artifact-head">
-                <span>Archive field</span>
-                <span>drag / hover</span>
-              </div>
-              <div class="artifact-foot">A living field model for a local archive system.</div>
+          <div class="hero-field" data-scene>
+            <div class="field-ui field-ui-top">
+              <span>archive field</span>
+              <span>drag / hover</span>
+            </div>
+            <div class="field-ui field-ui-bottom">
+              A private retrieval surface for the links you actually want to keep.
             </div>
           </div>
 
-          <div class="hero-grid">
-            <div class="hero-meta-col">
-              <span class="eyebrow">For Windows</span>
-              <span class="meta-block">Chrome + Brave import</span>
-              <span class="meta-block">Local archive</span>
-              <span class="meta-block">Terminal search</span>
+          <div class="hero-overlay">
+            <div class="hero-left-rail">
+              <p class="eyebrow">For Windows</p>
+              <div class="hero-rail-list">
+                <span>Chrome + Brave import</span>
+                <span>SQLite FTS index</span>
+                <span>Terminal retrieval</span>
+                <span>Local-only storage</span>
+              </div>
             </div>
 
-            <div class="hero-copy">
+            <div class="hero-main">
               <h1>Your bookmarks. Kept local. Ready in the terminal.</h1>
               <p class="hero-body">
                 FieldTheory imports from Chrome and Brave, stores a private local archive, and makes years of saved pages searchable from the command line.
@@ -78,16 +78,26 @@
               </div>
             </div>
 
-            <aside class="hero-sidecopy">
-              <p>Built for people who want recall, not browser clutter. The point is simple: keep what matters, find it fast, and leave the rest alone.</p>
-            </aside>
+            <div class="hero-right-rail">
+              <p>
+                Built for people who want recall, not browser clutter. Keep what matters, find it fast, and leave the rest alone.
+              </p>
+            </div>
           </div>
+        </section>
+
+        <section class="proof-ribbon frame-line" data-reveal>
+          <span>Chrome + Brave</span>
+          <span>Local archive</span>
+          <span>SQLite FTS</span>
+          <span>No hosted account</span>
+          <span>Windows-native</span>
         </section>
 
         <section class="thesis frame-line" id="thesis" data-reveal>
           <div class="section-kicker">Thesis</div>
           <div class="thesis-grid">
-            <div class="thesis-rail">
+            <div class="thesis-side">
               <span class="rail-label">Why it matters</span>
             </div>
             <div class="thesis-main">
@@ -96,7 +106,7 @@
                 Browser sync keeps links alive. It does not give them structure, recall, or a durable place in your workflow. FieldTheory does.
               </p>
             </div>
-            <div class="thesis-proof">
+            <div class="thesis-notes">
               <span>Private archive workflow</span>
               <span>Separate local data directory</span>
               <span>Searchable SQLite FTS index</span>
@@ -107,7 +117,7 @@
 
         <section class="workflow frame-line" id="workflow" data-reveal>
           <div class="section-kicker">Workflow</div>
-          <div class="workflow-grid">
+          <div class="workflow-line">
             <article class="step-node">
               <span class="step-index">01</span>
               <h3>Import without friction</h3>
