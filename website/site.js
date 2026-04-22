@@ -1,19 +1,52 @@
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-const hasGSAP = typeof window.gsap !== "undefined";
-const hasThree = typeof window.THREE !== "undefined";
+const root = document.documentElement;
+
+const TONES = {
+  hero: {
+    accent: "#ff9d6b",
+    accentSoft: "rgba(255, 157, 107, 0.18)",
+    accentFaint: "rgba(255, 157, 107, 0.05)",
+    accent2: "#8b7cff",
+    accent3: "#7dd9ff",
+  },
+  signal: {
+    accent: "#7dd9ff",
+    accentSoft: "rgba(125, 217, 255, 0.16)",
+    accentFaint: "rgba(125, 217, 255, 0.045)",
+    accent2: "#8b7cff",
+    accent3: "#ffb38d",
+  },
+  violet: {
+    accent: "#8b7cff",
+    accentSoft: "rgba(139, 124, 255, 0.16)",
+    accentFaint: "rgba(139, 124, 255, 0.04)",
+    accent2: "#ff9d6b",
+    accent3: "#7dd9ff",
+  },
+  amber: {
+    accent: "#ffb38d",
+    accentSoft: "rgba(255, 179, 141, 0.16)",
+    accentFaint: "rgba(255, 179, 141, 0.045)",
+    accent2: "#7dd9ff",
+    accent3: "#8b7cff",
+  },
+  graphite: {
+    accent: "#cfd6e6",
+    accentSoft: "rgba(207, 214, 230, 0.12)",
+    accentFaint: "rgba(207, 214, 230, 0.035)",
+    accent2: "#8b7cff",
+    accent3: "#7dd9ff",
+  },
+};
 
 window.addEventListener("DOMContentLoaded", () => {
   initCursorGlow();
-  initScrollState();
   initReveal();
-  initIntro();
-  initHoverMotion();
+  initToneObserver();
   initBackgroundCanvas();
-  initThreeScene();
 });
 
 function initCursorGlow() {
-  const root = document.documentElement;
   document.addEventListener(
     "pointermove",
     (event) => {
@@ -24,35 +57,12 @@ function initCursorGlow() {
   );
 }
 
-function initScrollState() {
-  const setState = () => {
-    document.body.classList.toggle("is-scrolled", window.scrollY > 12);
-  };
-  setState();
-  window.addEventListener("scroll", setState, { passive: true });
-}
-
 function initReveal() {
   const elements = Array.from(document.querySelectorAll("[data-reveal]"));
-  if (!elements.length || prefersReducedMotion) return;
+  if (!elements.length) return;
 
-  if (hasGSAP) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          gsap.fromTo(
-            entry.target,
-            { y: 30, opacity: 0, filter: "blur(12px)" },
-            { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.95, ease: "power3.out" }
-          );
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        });
-      },
-      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
-    );
-    elements.forEach((element) => observer.observe(element));
+  if (prefersReducedMotion || !("IntersectionObserver" in window)) {
+    elements.forEach((element) => element.classList.add("is-visible"));
     return;
   }
 
@@ -64,52 +74,47 @@ function initReveal() {
         observer.unobserve(entry.target);
       });
     },
-    { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
+    { threshold: 0.14, rootMargin: "0px 0px -8% 0px" }
   );
+
   elements.forEach((element) => observer.observe(element));
 }
 
-function initIntro() {
-  if (prefersReducedMotion || !hasGSAP) return;
+function initToneObserver() {
+  const sections = Array.from(document.querySelectorAll("[data-tone]"));
+  if (!sections.length || !("IntersectionObserver" in window)) {
+    applyTone("hero");
+    return;
+  }
 
-  const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-  tl.from(".masthead", { y: -18, opacity: 0, duration: 0.72 })
-    .from(".hero-copy .eyebrow", { y: 14, opacity: 0, duration: 0.5 }, "-=0.28")
-    .from(".hero-copy h1", { y: 26, opacity: 0, duration: 0.86 }, "-=0.08")
-    .from(".hero-body", { y: 18, opacity: 0, duration: 0.76 }, "-=0.48")
-    .from(".hero-actions", { y: 14, opacity: 0, duration: 0.64 }, "-=0.44")
-    .from(".proof-pills li", { y: 10, opacity: 0, stagger: 0.05, duration: 0.48 }, "-=0.4")
-    .from(".dossier", { x: 24, opacity: 0, duration: 0.9 }, "-=0.68");
+  let currentTone = "hero";
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      if (!visible) return;
+      const tone = visible.target.dataset.tone || "hero";
+      if (tone !== currentTone) {
+        currentTone = tone;
+        applyTone(tone);
+      }
+    },
+    { threshold: [0.22, 0.38, 0.55, 0.7] }
+  );
+
+  sections.forEach((section) => observer.observe(section));
+  applyTone(currentTone);
 }
 
-function initHoverMotion() {
-  if (prefersReducedMotion || !hasGSAP) return;
-
-  const panels = Array.from(document.querySelectorAll(
-    ".dossier, .install-panel, .command-well, .editorial-story, .note-card, .rail-block, .proof-item, .step-node"
-  ));
-
-  panels.forEach((panel) => {
-    gsap.set(panel, { transformPerspective: 1000, transformStyle: "preserve-3d" });
-    const rotX = gsap.quickTo(panel, "rotationX", { duration: 0.35, ease: "power3.out" });
-    const rotY = gsap.quickTo(panel, "rotationY", { duration: 0.35, ease: "power3.out" });
-    const y = gsap.quickTo(panel, "y", { duration: 0.35, ease: "power3.out" });
-
-    panel.addEventListener("pointermove", (event) => {
-      const rect = panel.getBoundingClientRect();
-      const px = (event.clientX - rect.left) / rect.width - 0.5;
-      const py = (event.clientY - rect.top) / rect.height - 0.5;
-      rotX(py * -4);
-      rotY(px * 5.8);
-      y(-3);
-    });
-
-    panel.addEventListener("pointerleave", () => {
-      rotX(0);
-      rotY(0);
-      y(0);
-    });
-  });
+function applyTone(tone) {
+  const palette = TONES[tone] || TONES.hero;
+  root.style.setProperty("--accent", palette.accent);
+  root.style.setProperty("--accent-soft", palette.accentSoft);
+  root.style.setProperty("--accent-faint", palette.accentFaint);
+  root.style.setProperty("--accent-2", palette.accent2);
+  root.style.setProperty("--accent-3", palette.accent3);
+  document.body.dataset.tone = tone;
 }
 
 function initBackgroundCanvas() {
@@ -120,82 +125,163 @@ function initBackgroundCanvas() {
 
   let width = 0;
   let height = 0;
+  let tone = "hero";
+  let cursorX = 0.5;
+  let cursorY = 0.22;
+  let targetX = 0.5;
+  let targetY = 0.22;
+  let scrollFactor = 0;
   let hubs = [];
   let stars = [];
   let arcs = [];
-  let cursorX = 0.5;
-  let cursorY = 0.24;
-  let targetX = cursorX;
-  let targetY = cursorY;
 
   function resize() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const rect = canvas.getBoundingClientRect();
+    width = Math.max(1, Math.floor(window.innerWidth));
+    height = Math.max(1, Math.floor(window.innerHeight));
+    canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+    canvas.style.width = `${rect.width}px`;
+    canvas.style.height = `${rect.height}px`;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     buildField();
   }
 
   function buildField() {
-    hubs = [
-      { x: width * 0.18, y: height * 0.18, color: "rgba(255,155,107,0.7)" },
-      { x: width * 0.52, y: height * 0.14, color: "rgba(143,231,255,0.72)" },
-      { x: width * 0.82, y: height * 0.24, color: "rgba(139,124,255,0.74)" },
-      { x: width * 0.72, y: height * 0.7, color: "rgba(143,231,255,0.5)" },
-      { x: width * 0.3, y: height * 0.82, color: "rgba(255,155,107,0.45)" },
-    ];
+    const presets = {
+      hero: [
+        [0.54, 0.12],
+        [0.18, 0.22],
+        [0.82, 0.22],
+        [0.7, 0.7],
+        [0.28, 0.8],
+      ],
+      signal: [
+        [0.48, 0.16],
+        [0.22, 0.3],
+        [0.76, 0.28],
+        [0.82, 0.72],
+        [0.2, 0.76],
+      ],
+      violet: [
+        [0.56, 0.16],
+        [0.26, 0.22],
+        [0.82, 0.18],
+        [0.72, 0.74],
+        [0.34, 0.82],
+      ],
+      amber: [
+        [0.52, 0.18],
+        [0.2, 0.28],
+        [0.8, 0.28],
+        [0.78, 0.68],
+        [0.3, 0.8],
+      ],
+      graphite: [
+        [0.5, 0.18],
+        [0.24, 0.28],
+        [0.76, 0.26],
+        [0.74, 0.72],
+        [0.28, 0.8],
+      ],
+    };
+
+    const colors = {
+      hero: ["255,157,107", "139,124,255", "125,217,255"],
+      signal: ["125,217,255", "139,124,255", "255,179,141"],
+      violet: ["139,124,255", "255,157,107", "125,217,255"],
+      amber: ["255,179,141", "125,217,255", "139,124,255"],
+      graphite: ["207,214,230", "139,124,255", "125,217,255"],
+    };
+
+    hubs = (presets[tone] || presets.hero).map(([nx, ny], index) => ({
+      x: nx * width,
+      y: ny * height,
+      r: 3 + index * 0.2,
+      color: colors[tone][index % colors[tone].length],
+    }));
 
     stars = Array.from({ length: 120 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      r: 0.5 + Math.random() * 1.8,
-      a: 0.08 + Math.random() * 0.2,
-      drift: 0.06 + Math.random() * 0.24,
+      r: 0.5 + Math.random() * 1.6,
+      a: 0.05 + Math.random() * 0.18,
+      drift: 0.08 + Math.random() * 0.35,
+      phase: Math.random() * Math.PI * 2,
     }));
 
-    arcs = Array.from({ length: 16 }, (_, index) => ({
+    arcs = Array.from({ length: 14 }, (_, index) => ({
       hub: index % hubs.length,
-      radius: 90 + Math.random() * Math.min(width, height) * 0.14,
+      radius: 100 + Math.random() * Math.min(width, height) * 0.18,
       start: Math.random() * Math.PI * 2,
-      span: 0.2 + Math.random() * 0.4,
-      speed: 0.00005 + Math.random() * 0.00008,
-      alpha: 0.02 + Math.random() * 0.03,
-      color: index % 2 ? "143,231,255" : "139,124,255",
+      span: 0.16 + Math.random() * 0.44,
+      speed: 0.000045 + Math.random() * 0.00009,
+      alpha: 0.02 + Math.random() * 0.024,
+      color: index % 3 === 0 ? "255,157,107" : index % 3 === 1 ? "139,124,255" : "125,217,255",
     }));
   }
 
   function draw(t) {
     cursorX += (targetX - cursorX) * 0.04;
     cursorY += (targetY - cursorY) * 0.04;
-
     ctx.clearRect(0, 0, width, height);
 
+    drawWash(t);
     drawGrid(t);
+    drawContours(t);
     drawArcs(t);
     drawLinks();
     drawHubs(t);
     drawStars(t);
+    drawFocus(t);
 
-    const glow = ctx.createRadialGradient(cursorX * width, cursorY * height, 0, cursorX * width, cursorY * height, Math.min(width, height) * 0.24);
-    glow.addColorStop(0, "rgba(143,231,255,0.08)");
-    glow.addColorStop(1, "rgba(143,231,255,0)");
-    ctx.fillStyle = glow;
+    if (!prefersReducedMotion) requestAnimationFrame(draw);
+  }
+
+  function drawWash(t) {
+    const px = cursorX * width;
+    const py = cursorY * height;
+
+    const glowA = ctx.createRadialGradient(px, py, 0, px, py, Math.min(width, height) * 0.35);
+    glowA.addColorStop(0, "rgba(125,217,255,0.08)");
+    glowA.addColorStop(0.4, "rgba(125,217,255,0.03)");
+    glowA.addColorStop(1, "rgba(125,217,255,0)");
+    ctx.fillStyle = glowA;
     ctx.fillRect(0, 0, width, height);
 
-    requestAnimationFrame(draw);
+    const drift = Math.sin(t * 0.00018) * 0.08;
+    const glowB = ctx.createRadialGradient(width * (0.2 + drift), height * 0.16, 0, width * (0.2 + drift), height * 0.16, Math.min(width, height) * 0.32);
+    glowB.addColorStop(0, "rgba(255,157,107,0.08)");
+    glowB.addColorStop(0.48, "rgba(255,157,107,0.025)");
+    glowB.addColorStop(1, "rgba(255,157,107,0)");
+    ctx.fillStyle = glowB;
+    ctx.fillRect(0, 0, width, height);
+
+    const glowC = ctx.createRadialGradient(width * 0.8, height * 0.14, 0, width * 0.8, height * 0.14, Math.min(width, height) * 0.28);
+    glowC.addColorStop(0, "rgba(139,124,255,0.08)");
+    glowC.addColorStop(0.5, "rgba(139,124,255,0.028)");
+    glowC.addColorStop(1, "rgba(139,124,255,0)");
+    ctx.fillStyle = glowC;
+    ctx.fillRect(0, 0, width, height);
   }
 
   function drawGrid(t) {
     const cell = 96;
+    const yOffset = ((scrollFactor * 0.18) + t * 0.004) % cell;
+    const xOffset = ((scrollFactor * 0.08) + t * 0.003) % cell;
+
     ctx.save();
     ctx.lineWidth = 1;
-    for (let x = ((t * 0.01) % cell); x < width; x += cell) {
-      ctx.strokeStyle = "rgba(255,255,255,0.018)";
+    for (let x = -cell + xOffset; x < width + cell; x += cell) {
+      ctx.strokeStyle = "rgba(255,255,255,0.016)";
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, height);
       ctx.stroke();
     }
-    for (let y = ((t * 0.008) % cell); y < height; y += cell) {
-      ctx.strokeStyle = "rgba(255,255,255,0.014)";
+    for (let y = -cell + yOffset; y < height + cell; y += cell) {
+      ctx.strokeStyle = "rgba(255,255,255,0.012)";
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(width, y);
@@ -204,260 +290,150 @@ function initBackgroundCanvas() {
     ctx.restore();
   }
 
+  function drawContours(t) {
+    const rows = 10;
+    const step = Math.max(42, Math.round(height / rows));
+    const base = height * 0.38;
+
+    ctx.save();
+    ctx.lineWidth = 1;
+    for (let i = 0; i < rows; i++) {
+      const y = base + (i - rows / 2) * step * 0.78 + Math.sin(t * 0.00035 + i) * 8;
+      const alpha = 0.028 + Math.max(0, 0.025 - Math.abs(i - rows / 2) * 0.0022);
+      ctx.strokeStyle = i % 2 === 0 ? `rgba(139,124,255,${alpha})` : `rgba(125,217,255,${alpha * 0.85})`;
+      ctx.beginPath();
+      const segments = 14;
+      for (let s = 0; s <= segments; s++) {
+        const x = (width / segments) * s;
+        const wave = Math.sin(s * 0.75 + t * 0.001 + i) * 14 + Math.cos(s * 1.35 + t * 0.0006 + i * 1.2) * 8;
+        const lift = Math.sin((x / width) * Math.PI * 2 + t * 0.0005 + i * 0.28) * 10;
+        const yy = y + wave + lift;
+        if (s === 0) ctx.moveTo(x, yy);
+        else ctx.lineTo(x, yy);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
   function drawArcs(t) {
+    ctx.save();
+    ctx.lineWidth = 1.15;
     arcs.forEach((arc) => {
       const hub = hubs[arc.hub];
       const start = arc.start + t * arc.speed;
-      ctx.save();
       ctx.strokeStyle = `rgba(${arc.color},${arc.alpha})`;
-      ctx.lineWidth = 1.1;
       ctx.beginPath();
       ctx.arc(hub.x, hub.y, arc.radius, start, start + arc.span);
       ctx.stroke();
-      ctx.restore();
     });
+    ctx.restore();
   }
 
   function drawLinks() {
-    for (let i = 0; i < hubs.length; i++) {
+    ctx.save();
+    hubs.forEach((a, i) => {
       for (let j = i + 1; j < hubs.length; j++) {
-        const a = hubs[i];
         const b = hubs[j];
         const dx = a.x - b.x;
         const dy = a.y - b.y;
         const d = Math.sqrt(dx * dx + dy * dy);
-        if (d > Math.min(width, height) * 0.5) continue;
-        ctx.strokeStyle = `rgba(255,255,255,${0.03 - d / (Math.min(width, height) * 40)})`;
-        ctx.lineWidth = 1;
+        if (d > Math.min(width, height) * 0.52) continue;
+        const alpha = Math.max(0.02, 0.05 - d / (Math.min(width, height) * 18));
+        ctx.strokeStyle = `rgba(255,255,255,${alpha})`;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
         ctx.lineTo(b.x, b.y);
         ctx.stroke();
       }
-    }
+    });
+    ctx.restore();
   }
 
   function drawHubs(t) {
+    ctx.save();
     hubs.forEach((hub, index) => {
-      const pulse = 3 + (Math.sin(t * 0.0012 + index) * 0.5 + 0.5) * 10;
-      const grad = ctx.createRadialGradient(hub.x, hub.y, 0, hub.x, hub.y, pulse * 4.5);
-      grad.addColorStop(0, hub.color);
+      const pulse = 4 + (Math.sin(t * 0.001 + index) * 0.5 + 0.5) * 8;
+      const grad = ctx.createRadialGradient(hub.x, hub.y, 0, hub.x, hub.y, pulse * 4.8);
+      grad.addColorStop(0, `rgba(${hub.color},0.95)`);
+      grad.addColorStop(0.35, `rgba(${hub.color},0.18)`);
       grad.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(hub.x, hub.y, pulse * 4.5, 0, Math.PI * 2);
+      ctx.arc(hub.x, hub.y, pulse * 4.8, 0, Math.PI * 2);
       ctx.fill();
 
-      ctx.fillStyle = "rgba(255,255,255,0.72)";
+      ctx.fillStyle = "rgba(255,255,255,0.74)";
       ctx.beginPath();
-      ctx.arc(hub.x, hub.y, pulse * 0.3, 0, Math.PI * 2);
+      ctx.arc(hub.x, hub.y, pulse * 0.34, 0, Math.PI * 2);
       ctx.fill();
     });
+    ctx.restore();
   }
 
   function drawStars(t) {
+    ctx.save();
     stars.forEach((star, index) => {
-      const x = star.x + Math.sin(t * 0.00015 + index) * star.drift;
-      const y = star.y + Math.cos(t * 0.00012 + index) * star.drift;
+      const x = star.x + Math.sin(t * 0.00015 + star.phase + index) * star.drift;
+      const y = star.y + Math.cos(t * 0.00012 + star.phase + index) * star.drift;
       ctx.fillStyle = `rgba(255,255,255,${star.a})`;
       ctx.beginPath();
       ctx.arc(x, y, star.r, 0, Math.PI * 2);
       ctx.fill();
     });
+    ctx.restore();
   }
 
-  window.addEventListener("pointermove", (event) => {
-    targetX = event.clientX / window.innerWidth;
-    targetY = event.clientY / window.innerHeight;
-  }, { passive: true });
+  function drawFocus(t) {
+    const px = cursorX * width;
+    const py = cursorY * height;
+    const radius = Math.min(width, height) * 0.22;
+    const glow = ctx.createRadialGradient(px, py, 0, px, py, radius);
+    glow.addColorStop(0, "rgba(125,217,255,0.08)");
+    glow.addColorStop(0.5, "rgba(125,217,255,0.03)");
+    glow.addColorStop(1, "rgba(125,217,255,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, width, height);
+
+    const seam = ctx.createLinearGradient(0, height * 0.1, width, height * 0.32);
+    seam.addColorStop(0, "rgba(255,157,107,0.01)");
+    seam.addColorStop(0.48, `rgba(255,255,255,${0.02 + Math.sin(t * 0.0004) * 0.004})`);
+    seam.addColorStop(1, "rgba(139,124,255,0.01)");
+    ctx.fillStyle = seam;
+    ctx.fillRect(0, 0, width, height);
+  }
+
+  window.addEventListener(
+    "pointermove",
+    (event) => {
+      targetX = event.clientX / window.innerWidth;
+      targetY = event.clientY / window.innerHeight;
+    },
+    { passive: true }
+  );
+
+  window.addEventListener(
+    "scroll",
+    () => {
+      scrollFactor = window.scrollY || 0;
+    },
+    { passive: true }
+  );
+
+  const toneObserver = new MutationObserver(() => {
+    const nextTone = document.body.dataset.tone || "hero";
+    if (nextTone !== tone) {
+      tone = nextTone;
+      buildField();
+    }
+  });
+  toneObserver.observe(document.body, { attributes: true, attributeFilter: ["data-tone"] });
 
   window.addEventListener("resize", resize);
   resize();
+  if (prefersReducedMotion) {
+    draw(0);
+    return;
+  }
   requestAnimationFrame(draw);
-}
-
-function initThreeScene() {
-  const host = document.querySelector("[data-scene]");
-  if (!(host instanceof HTMLElement) || !hasThree) return;
-
-  const THREE = window.THREE;
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-  camera.position.set(0, 0.12, 4.55);
-
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setClearColor(0x000000, 0);
-  host.prepend(renderer.domElement);
-  renderer.domElement.style.position = "absolute";
-  renderer.domElement.style.inset = "0";
-  renderer.domElement.style.width = "100%";
-  renderer.domElement.style.height = "100%";
-  renderer.domElement.style.filter = "drop-shadow(0 0 24px rgba(184, 109, 79, 0.38))";
-
-  const ambient = new THREE.AmbientLight(0x57545f, 1.65);
-  scene.add(ambient);
-
-  const key = new THREE.PointLight(0xe7b18f, 4.6, 20, 2);
-  key.position.set(3.2, 2.8, 5.2);
-  scene.add(key);
-
-  const fill = new THREE.PointLight(0x8c7cff, 2.2, 20, 2);
-  fill.position.set(-3.4, -2.0, 4.6);
-  scene.add(fill);
-
-  const rim = new THREE.PointLight(0xf3efe9, 1.6, 18, 2);
-  rim.position.set(0, -1.4, 6.4);
-  scene.add(rim);
-
-  const group = new THREE.Group();
-  group.scale.set(1.22, 1.22, 1.22);
-  scene.add(group);
-
-  function radialTexture(inner, outer) {
-    const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext("2d");
-    const grad = ctx.createRadialGradient(64, 64, 6, 64, 64, 64);
-    grad.addColorStop(0, inner);
-    grad.addColorStop(0.45, outer);
-    grad.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 128, 128);
-    return new THREE.CanvasTexture(canvas);
-  }
-
-  const warmGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTexture("rgba(248,214,191,0.96)", "rgba(184,109,79,0.2)"), transparent: true, opacity: 0.78, depthWrite: false, blending: THREE.AdditiveBlending }));
-  warmGlow.scale.set(5.6, 5.6, 1);
-  warmGlow.position.set(0.16, 0.1, -0.08);
-  group.add(warmGlow);
-
-  const coolGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTexture("rgba(160,145,255,0.94)", "rgba(125,103,216,0.2)"), transparent: true, opacity: 0.56, depthWrite: false, blending: THREE.AdditiveBlending }));
-  coolGlow.scale.set(5.0, 5.0, 1);
-  coolGlow.position.set(-0.2, -0.12, 0.08);
-  group.add(coolGlow);
-
-  const core = new THREE.Mesh(new THREE.IcosahedronGeometry(1.26, 3), new THREE.MeshStandardMaterial({ color: 0x191614, roughness: 0.2, metalness: 0.95, emissive: 0xb86d4f, emissiveIntensity: 1.45 }));
-  group.add(core);
-
-  const halo = new THREE.Mesh(new THREE.SphereGeometry(1.82, 32, 32), new THREE.MeshBasicMaterial({ color: 0xb86d4f, transparent: true, opacity: 0.18, wireframe: true, blending: THREE.AdditiveBlending }));
-  group.add(halo);
-
-  const wire = new THREE.Mesh(new THREE.OctahedronGeometry(2.04, 1), new THREE.MeshBasicMaterial({ color: 0xb86d4f, wireframe: true, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending }));
-  group.add(wire);
-
-  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.08, 12, 150), new THREE.MeshStandardMaterial({ color: 0x8c7cff, roughness: 0.16, metalness: 0.5, emissive: 0x22182e, emissiveIntensity: 1.4 }));
-  ring.rotation.x = Math.PI * 0.44;
-  ring.rotation.y = Math.PI * 0.18;
-  group.add(ring);
-
-  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.74, 0.06, 10, 160), new THREE.MeshBasicMaterial({ color: 0xf5e7d9, transparent: true, opacity: 0.34, blending: THREE.AdditiveBlending }));
-  ring2.rotation.x = Math.PI * 0.26;
-  ring2.rotation.z = Math.PI * 0.42;
-  group.add(ring2);
-
-  const lineGeo = new THREE.BufferGeometry();
-  const linePositions = new Float32Array(120 * 3);
-  for (let i = 0; i < 120; i++) {
-    const angle = (i / 120) * Math.PI * 2;
-    const r = 2.15 + Math.sin(i * 0.45) * 0.24;
-    linePositions[i * 3] = Math.cos(angle) * r;
-    linePositions[i * 3 + 1] = Math.sin(angle * 1.8) * 0.76;
-    linePositions[i * 3 + 2] = Math.sin(angle) * r * 0.14;
-  }
-  lineGeo.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
-  const orbitLine = new THREE.LineLoop(lineGeo, new THREE.LineBasicMaterial({ color: 0xf0d6ba, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending }));
-  orbitLine.rotation.x = Math.PI * 0.12;
-  orbitLine.rotation.z = Math.PI * 0.08;
-  group.add(orbitLine);
-
-  const particleCount = 980;
-  const positions = new Float32Array(particleCount * 3);
-  const colors = new Float32Array(particleCount * 3);
-  const c1 = new THREE.Color(0xe8b18b);
-  const c2 = new THREE.Color(0x8d79ff);
-  const c3 = new THREE.Color(0xf4efe2);
-  for (let i = 0; i < particleCount; i++) {
-    const r = 2.6 + Math.random() * 3.1;
-    const theta = Math.random() * Math.PI * 2;
-    const phi = Math.acos(2 * Math.random() - 1);
-    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-    positions[i * 3 + 2] = r * Math.cos(phi);
-    const mix = i % 3 === 0 ? c1 : i % 3 === 1 ? c2 : c3;
-    colors[i * 3] = mix.r;
-    colors[i * 3 + 1] = mix.g;
-    colors[i * 3 + 2] = mix.b;
-  }
-  const particleGeo = new THREE.BufferGeometry();
-  particleGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-  particleGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ size: 0.055, vertexColors: true, transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
-  group.add(particles);
-
-  const sparkGeo = new THREE.BufferGeometry();
-  const sparkPositions = new Float32Array(180 * 3);
-  for (let i = 0; i < 180; i++) {
-    sparkPositions[i * 3] = (Math.random() - 0.5) * 8.4;
-    sparkPositions[i * 3 + 1] = (Math.random() - 0.5) * 5.2;
-    sparkPositions[i * 3 + 2] = (Math.random() - 0.5) * 6.2;
-  }
-  sparkGeo.setAttribute("position", new THREE.BufferAttribute(sparkPositions, 3));
-  const sparks = new THREE.Points(sparkGeo, new THREE.PointsMaterial({ size: 0.03, color: 0xf4efe2, transparent: true, opacity: 0.52, depthWrite: false, blending: THREE.AdditiveBlending }));
-  group.add(sparks);
-
-  let targetRotX = 0;
-  let targetRotY = 0;
-  let pointerX = 0;
-  let pointerY = 0;
-
-  function resize() {
-    const rect = host.getBoundingClientRect();
-    renderer.setSize(Math.max(1, Math.floor(rect.width)), Math.max(1, Math.floor(rect.height)), false);
-    camera.aspect = rect.width / rect.height;
-    camera.updateProjectionMatrix();
-  }
-
-  resize();
-  window.addEventListener("resize", resize);
-
-  host.addEventListener("pointermove", (event) => {
-    const rect = host.getBoundingClientRect();
-    pointerX = (event.clientX - rect.left) / rect.width - 0.5;
-    pointerY = (event.clientY - rect.top) / rect.height - 0.5;
-    targetRotY = pointerX * 1.0;
-    targetRotX = -pointerY * 0.78;
-  });
-  host.addEventListener("pointerleave", () => {
-    targetRotX = 0;
-    targetRotY = 0;
-  });
-
-  const clock = new THREE.Clock();
-  function animate() {
-    const elapsed = clock.getElapsedTime();
-    group.rotation.y += (targetRotY - group.rotation.y) * 0.055;
-    group.rotation.x += (targetRotX - group.rotation.x) * 0.055;
-    group.position.x = Math.sin(elapsed * 0.35) * 0.08;
-    group.position.y = Math.cos(elapsed * 0.52) * 0.06;
-    core.rotation.x = elapsed * 0.65;
-    core.rotation.y = elapsed * 0.8;
-    halo.rotation.y = elapsed * 0.18;
-    wire.rotation.z = elapsed * -0.18;
-    ring.rotation.z = elapsed * 0.28;
-    ring2.rotation.y = elapsed * -0.26;
-    particles.rotation.y = elapsed * 0.11;
-    particles.rotation.x = Math.sin(elapsed * 0.15) * 0.08;
-    sparks.rotation.z = elapsed * 0.045;
-    warmGlow.material.opacity = 0.68 + Math.sin(elapsed * 1.4) * 0.08;
-    coolGlow.material.opacity = 0.44 + Math.cos(elapsed * 1.2) * 0.05;
-    camera.position.x += pointerX * 0.08 - camera.position.x * 0.035;
-    camera.position.y += -pointerY * 0.06 - camera.position.y * 0.035;
-    camera.lookAt(0, 0, 0);
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-  }
-
-  animate();
 }
