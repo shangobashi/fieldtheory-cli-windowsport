@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="FieldTheory for Windows v0.4.2 is a local-first bookmark archive for Windows. Import Chrome and Brave bookmarks, index them with SQLite FTS, and search them from the terminal."
+      content="FieldTheory for Windows v0.4.3 is a local-first bookmark archive for Windows. Import Chrome and Brave bookmarks, index them with SQLite FTS, and search them from the terminal."
     />
     <meta name="theme-color" content="#05070b" />
-    <title>FieldTheory for Windows v0.4.2</title>
+    <title>FieldTheory for Windows v0.4.3</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -16,15 +16,19 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="./site.css" />
+    <script defer src="./vendor/three.min.js"></script>
     <script defer src="./site.js"></script>
   </head>
   <body>
     <a class="skip-link" href="#content">Skip to content</a>
 
     <div class="background" aria-hidden="true">
+      <canvas id="field-canvas"></canvas>
       <div class="background-grid"></div>
+      <div class="background-beam"></div>
       <div class="background-glow background-glow-a"></div>
       <div class="background-glow background-glow-b"></div>
+      <div class="background-noise"></div>
       <div class="background-vignette"></div>
     </div>
 
@@ -39,7 +43,7 @@
         </a>
 
         <div class="release-strip" aria-label="Release metadata">
-          <span>v0.4.2</span>
+          <span>v0.4.3</span>
           <span>Windows CLI</span>
           <span>SQLite FTS</span>
         </div>
@@ -257,7 +261,7 @@
 
       <footer class="footer frame-line">
         <div class="footer-copy">
-          <p>FieldTheory for Windows v0.4.2 · local-first bookmark archiving for the Windows terminal.</p>
+          <p>FieldTheory for Windows v0.4.3 · local-first bookmark archiving for the Windows terminal.</p>
           <p class="footer-meta">Created by Shango Bashi · MIT License · Inspired by Andrew Farah’s original Field Theory.</p>
         </div>
         <a

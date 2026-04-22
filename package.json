@@ -1,65 +1,130 @@
-{
-  "name": "fieldtheory-cli-windowsport",
-  "version": "0.4.2",
-  "description": "FieldTheory for Windows. Inspired by Andrew Farah's Field Theory CLI for local X/Twitter bookmark sync, search, and classification.",
-  "type": "module",
-  "bin": {
-    "ftx": "bin/ft.mjs"
-  },
-  "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "test": "tsx --test tests/**/*.test.ts",
-    "dev": "tsx src/cli.ts",
-    "start": "node dist/cli.js",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run build"
-  },
-  "files": [
-    "bin/",
-    "dist/",
-    "LICENSE",
-    "README.md"
-  ],
-  "engines": {
-    "node": ">=20"
-  },
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/shangobashi/fieldtheory-cli-windowsport.git"
-  },
-  "homepage": "https://github.com/shangobashi/fieldtheory-cli-windowsport#readme",
-  "bugs": {
-    "url": "https://github.com/shangobashi/fieldtheory-cli-windowsport/issues"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "keywords": [
-    "bookmarks",
-    "twitter",
-    "x",
-    "windows",
-    "codex",
-    "search",
-    "fts5",
-    "sqlite",
-    "local-first",
-    "self-custody",
-    "cli"
-  ],
-  "dependencies": {
-    "commander": "^14.0.3",
-    "dotenv": "^17.3.1",
-    "sql.js": "^1.14.1",
-    "sql.js-fts5": "^1.4.0",
-    "ws": "^8.20.0"
-  },
-  "devDependencies": {
-    "@types/node": "^25.5.0",
-    "@types/sql.js": "^1.4.11",
-    "@types/ws": "^8.18.1",
-    "tsx": "^4.21.0",
-    "typescript": "^6.0.2"
-  }
-}
+{
+
+  "name": "fieldtheory-cli-windowsport",
+
+  "version": "0.4.3",
+
+  "description": "FieldTheory for Windows. Inspired by Andrew Farah's Field Theory CLI for local X/Twitter bookmark sync, search, and classification.",
+
+  "type": "module",
+
+  "bin": {
+
+    "ftx": "bin/ft.mjs"
+
+  },
+
+  "scripts": {
+
+    "build": "tsc -p tsconfig.json",
+
+    "test": "tsx --test tests/**/*.test.ts",
+
+    "dev": "tsx src/cli.ts",
+
+    "start": "node dist/cli.js",
+
+    "prepare": "npm run build",
+
+    "prepublishOnly": "npm run build"
+
+  },
+
+  "files": [
+
+    "bin/",
+
+    "dist/",
+
+    "LICENSE",
+
+    "README.md"
+
+  ],
+
+  "engines": {
+
+    "node": ">=20"
+
+  },
+
+  "license": "MIT",
+
+  "repository": {
+
+    "type": "git",
+
+    "url": "git+https://github.com/shangobashi/fieldtheory-cli-windowsport.git"
+
+  },
+
+  "homepage": "https://github.com/shangobashi/fieldtheory-cli-windowsport#readme",
+
+  "bugs": {
+
+    "url": "https://github.com/shangobashi/fieldtheory-cli-windowsport/issues"
+
+  },
+
+  "publishConfig": {
+
+    "access": "public"
+
+  },
+
+  "keywords": [
+
+    "bookmarks",
+
+    "twitter",
+
+    "x",
+
+    "windows",
+
+    "codex",
+
+    "search",
+
+    "fts5",
+
+    "sqlite",
+
+    "local-first",
+
+    "self-custody",
+
+    "cli"
+
+  ],
+
+  "dependencies": {
+
+    "commander": "^14.0.3",
+
+    "dotenv": "^17.3.1",
+
+    "sql.js": "^1.14.1",
+
+    "sql.js-fts5": "^1.4.0",
+
+    "ws": "^8.20.0"
+
+  },
+
+  "devDependencies": {
+
+    "@types/node": "^25.5.0",
+
+    "@types/sql.js": "^1.4.11",
+
+    "@types/ws": "^8.18.1",
+
+    "tsx": "^4.21.0",
+
+    "typescript": "^6.0.2"
+
+  }
+
+}
+
