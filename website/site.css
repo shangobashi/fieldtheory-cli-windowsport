@@ -8,9 +8,9 @@
   --subtle: rgba(238, 244, 251, 0.42);
   --line: rgba(255, 255, 255, 0.08);
   --line-strong: rgba(255, 255, 255, 0.16);
-  --accent: #87e3ff;
-  --accent-2: #8c7cff;
-  --accent-3: #ff9f70;
+  --accent: #9fc3df;
+  --accent-2: #7f92c7;
+  --accent-3: #b88f76;
   --panel: rgba(12, 15, 21, 0.84);
   --shadow: 0 18px 60px rgba(0, 0, 0, 0.26);
   --shadow-strong: 0 32px 100px rgba(0, 0, 0, 0.44);
@@ -26,7 +26,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(circle at var(--cursor-x) var(--cursor-y), rgba(135, 227, 255, 0.05), transparent 16%),
+    radial-gradient(circle at var(--cursor-x) var(--cursor-y), rgba(159, 195, 223, 0.05), transparent 16%),
     linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 46%, var(--bg-3) 100%);
   color: var(--text);
   font-family: "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", Inter, system-ui, sans-serif;
@@ -43,15 +43,15 @@ body::after {
 }
 body::before {
   background:
-    radial-gradient(circle at 12% 10%, rgba(255, 159, 112, 0.08), transparent 24%),
-    radial-gradient(circle at 82% 16%, rgba(140, 124, 255, 0.12), transparent 26%),
+    radial-gradient(circle at 12% 10%, rgba(184, 143, 118, 0.08), transparent 24%),
+    radial-gradient(circle at 82% 16%, rgba(127, 146, 199, 0.12), transparent 26%),
     radial-gradient(circle at 50% -6%, rgba(255, 255, 255, 0.07), transparent 20%);
 }
 body::after {
   background: radial-gradient(circle at center, transparent 44%, rgba(0, 0, 0, 0.26) 100%);
 }
 
-::selection { background: rgba(135, 227, 255, 0.2); }
+::selection { background: rgba(159, 195, 223, 0.2); }
 a { color: inherit; }
 h1, h2, h3, p, ul { margin: 0; }
 code, pre,
@@ -81,7 +81,7 @@ code, pre,
   z-index: 1;
   background:
     radial-gradient(ellipse at 50% -8%, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.06) 18%, rgba(255,255,255,0.02) 34%, transparent 58%),
-    radial-gradient(ellipse at 50% 10%, rgba(135,227,255,0.05) 0%, rgba(135,227,255,0.02) 22%, transparent 48%);
+    radial-gradient(ellipse at 50% 10%, rgba(159,195,223,0.05) 0%, rgba(159,195,223,0.02) 22%, transparent 48%);
   mix-blend-mode: screen;
 }
 .bg-vignette {
@@ -189,7 +189,7 @@ code, pre,
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
-.meta-chip-accent { color: var(--accent); border-color: rgba(135,227,255,0.18); }
+.meta-chip-accent { color: var(--accent); border-color: rgba(159,195,223,0.18); }
 .button {
   border: 1px solid transparent;
   font-weight: 700;
@@ -197,9 +197,9 @@ code, pre,
   font-family: "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", Inter, system-ui, sans-serif;
 }
 .button-primary {
-  background: linear-gradient(135deg, var(--accent), #68c7f2);
+  background: linear-gradient(135deg, var(--accent), #7ba4c4);
   color: #081116;
-  box-shadow: 0 16px 34px rgba(135, 227, 255, 0.16);
+  box-shadow: 0 16px 34px rgba(159, 195, 223, 0.16);
 }
 .button-secondary {
   background: rgba(255,255,255,0.04);
@@ -209,16 +209,12 @@ code, pre,
 
 .hero {
   position: relative;
-  padding: 28px 0 18px;
-  min-height: clamp(620px, 74vw, 860px);
-}
-.hero-scene-shell {
-  position: absolute;
-  inset: 22px 0 24px 0;
+  padding: 22px 0 12px;
+  min-height: clamp(540px, 66vw, 740px);
 }
 .hero-field {
   position: absolute;
-  inset: 0;
+  inset: 18px 0 18px 0;
   overflow: hidden;
   border-radius: 18px;
   border: 1px solid rgba(255,255,255,0.06);
@@ -254,15 +250,15 @@ code, pre,
   z-index: 2;
   display: grid;
   grid-template-columns: 170px minmax(0, 1fr) 220px;
-  gap: 26px;
+  gap: 22px;
   min-height: inherit;
   align-items: end;
-  padding: 28px 0 8px;
+  padding: 22px 0 6px;
 }
 .hero-left-rail,
 .hero-right-rail {
   align-self: start;
-  padding-top: 28px;
+  padding-top: 24px;
 }
 .eyebrow,
 .section-kicker,
@@ -287,8 +283,8 @@ code, pre,
 }
 .hero-main {
   align-self: center;
-  max-width: 760px;
-  padding-top: 120px;
+  max-width: 700px;
+  padding-top: 84px;
 }
 .hero h1,
 .thesis-main h2,
@@ -299,7 +295,7 @@ code, pre,
   letter-spacing: -0.065em;
   line-height: 0.92;
 }
-.hero h1 { font-size: clamp(4.4rem, 8vw, 7.4rem); max-width: 10ch; }
+.hero h1 { font-size: clamp(4rem, 7.2vw, 6.8rem); max-width: 10ch; }
 .hero-body,
 .thesis-main p,
 .step-node p,
@@ -311,18 +307,18 @@ code, pre,
   line-height: 1.72;
 }
 .hero-body {
-  margin-top: 20px;
-  font-size: clamp(1.04rem, 1.46vw, 1.12rem);
-  max-width: 56ch;
+  margin-top: 18px;
+  font-size: clamp(1.02rem, 1.34vw, 1.08rem);
+  max-width: 48ch;
 }
-.hero-actions { margin-top: 22px; }
+.hero-actions { margin-top: 20px; }
 .proof-pills {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
   list-style: none;
   padding: 0;
-  margin-top: 18px;
+  margin-top: 16px;
   max-width: 520px;
 }
 .proof-pills li {
@@ -333,7 +329,7 @@ code, pre,
   color: var(--muted);
   font-size: 0.88rem;
 }
-.hero-right-rail p { font-size: 0.98rem; max-width: 20ch; }
+.hero-right-rail p { font-size: 0.96rem; max-width: 19ch; }
 
 .proof-ribbon,
 .thesis,
@@ -342,15 +338,15 @@ code, pre,
 .install-band,
 .closing,
 .footer {
-  padding: 26px 0;
+  padding: 20px 0;
 }
 .proof-ribbon {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 14px;
+  gap: 12px;
 }
 .proof-ribbon span {
-  padding: 12px 0;
+  padding: 10px 0;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   font-family: "IBM Plex Mono", monospace;
   font-size: 0.76rem;
@@ -361,27 +357,27 @@ code, pre,
 
 .thesis-grid {
   display: grid;
-  grid-template-columns: 170px minmax(0, 1.3fr) minmax(300px, 0.7fr);
-  gap: 24px;
+  grid-template-columns: 170px minmax(0, 1.3fr) minmax(280px, 0.7fr);
+  gap: 22px;
   align-items: start;
 }
 .thesis-main h2,
 .system-copy h2,
 .install-copy h2,
 .closing-copy h2 {
-  font-size: clamp(2.7rem, 5vw, 5rem);
+  font-size: clamp(2.5rem, 4.4vw, 4.6rem);
   max-width: 14ch;
 }
 .thesis-main p,
 .system-copy p,
-.install-copy p { margin-top: 14px; max-width: 58ch; }
+.install-copy p { margin-top: 12px; max-width: 56ch; }
 .thesis-notes {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   padding-top: 6px;
 }
 .thesis-notes span {
-  padding: 12px 0;
+  padding: 10px 0;
   border-bottom: 1px solid rgba(255,255,255,0.08);
   color: var(--muted);
 }
@@ -391,8 +387,8 @@ code, pre,
   position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 28px;
-  padding-top: 20px;
+  gap: 24px;
+  padding-top: 18px;
 }
 .workflow-line::before {
   content: "";
@@ -401,7 +397,7 @@ code, pre,
   right: 0;
   top: 28px;
   height: 1px;
-  background: linear-gradient(90deg, rgba(135,227,255,0.08), rgba(140,124,255,0.18), rgba(255,159,112,0.08));
+  background: linear-gradient(90deg, rgba(159,195,223,0.08), rgba(127,146,199,0.18), rgba(184,143,118,0.08));
 }
 .step-node {
   position: relative;
@@ -416,25 +412,25 @@ code, pre,
   height: 12px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--accent), var(--accent-2));
-  box-shadow: 0 0 20px rgba(135,227,255,0.25);
+  box-shadow: 0 0 20px rgba(159,195,223,0.25);
 }
 .step-node h3 {
   font-family: "Segoe UI Variable Display", "Segoe UI Variable", "Segoe UI", Inter, system-ui, sans-serif;
-  font-size: 1.32rem;
+  font-size: 1.28rem;
   letter-spacing: -0.04em;
 }
-.step-node p { margin-top: 10px; max-width: 34ch; }
+.step-node p { margin-top: 10px; max-width: 32ch; }
 
 .system {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px 420px;
-  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 190px 320px;
+  gap: 22px;
   align-items: start;
 }
 .system-rail {
   display: grid;
-  gap: 12px;
-  padding-top: 34px;
+  gap: 10px;
+  padding-top: 28px;
 }
 .rail-block {
   padding: 14px;
@@ -486,17 +482,22 @@ code, pre,
   font-size: 0.92rem;
   line-height: 1.72;
 }
+.wrap-code {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 
 .install-band {
   display: grid;
-  gap: 18px;
+  gap: 16px;
 }
 .install-line {
   display: grid;
-  grid-template-columns: 110px minmax(0, 1fr) auto;
+  grid-template-columns: 92px minmax(0, 420px) auto;
   gap: 16px;
   align-items: center;
-  padding-top: 18px;
+  padding-top: 14px;
 }
 .install-line a {
   text-decoration: none;
@@ -516,9 +517,17 @@ code, pre,
 .footer {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 18px;
   color: var(--subtle);
+}
+.footer-copy {
+  display: grid;
+  gap: 6px;
+}
+.footer-meta {
+  font-size: 0.86rem;
+  color: var(--muted);
 }
 .footer a { text-decoration: none; font-weight: 700; }
 
@@ -541,7 +550,7 @@ code, pre,
   .masthead-meta,
   .masthead-links,
   .closing-actions { justify-content: flex-start; }
-  .hero-scene-shell {
+  .hero-field {
     position: relative;
     inset: auto;
     min-height: 360px;
@@ -556,6 +565,19 @@ code, pre,
 @media (max-width: 760px) {
   :root { --container: min(100%, calc(100% - 18px)); }
   .page-shell { padding-top: 10px; }
+  .masthead {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .masthead-meta,
+  .masthead-links {
+    justify-content: flex-start;
+  }
+  .meta-chip,
+  .masthead-links a,
+  .button {
+    min-height: 38px;
+  }
   .hero h1 { font-size: clamp(3rem, 14vw, 5rem); }
   .thesis-main h2,
   .system-copy h2,
@@ -563,6 +585,17 @@ code, pre,
   .closing-copy h2 { font-size: clamp(2rem, 10vw, 3.5rem); }
   .proof-pills { grid-template-columns: 1fr; }
   .hero-field { min-height: 280px; }
+  .hero-overlay {
+    gap: 14px;
+  }
+  .proof-ribbon {
+    gap: 8px;
+  }
+  .proof-ribbon span,
+  .thesis-notes span,
+  .hero-rail-list span {
+    font-size: 0.78rem;
+  }
   .footer { flex-direction: column; align-items: flex-start; }
 }
 
