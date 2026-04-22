@@ -4,14 +4,11 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="FieldTheory for Windows v0.4.1 keeps bookmarks local, searchable, and off the cloud." />
-    <meta name="theme-color" content="#070708" />
+    <meta name="theme-color" content="#06070a" />
     <title>FieldTheory for Windows v0.4.1</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="./site.css" />
     <script defer src="./vendor/three.min.js"></script>
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
@@ -20,263 +17,190 @@
   <body>
     <a class="skip-link" href="#content">Skip to content</a>
 
-    <div class="ink-wash ink-wash-a" aria-hidden="true"></div>
-    <div class="ink-wash ink-wash-b" aria-hidden="true"></div>
-    <div class="ink-grid" aria-hidden="true"></div>
-    <div class="ink-grain" aria-hidden="true"></div>
+    <canvas id="bg-canvas" aria-hidden="true"></canvas>
+    <div class="bg-vignette" aria-hidden="true"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-grain" aria-hidden="true"></div>
 
     <div class="page-shell">
-      <header class="masthead">
+      <header class="masthead shell-line">
         <a class="brand" href="#top" aria-label="FieldTheory for Windows home">
           <img class="brand-logo" src="./images/fieldtheory-logo-white.png" alt="" aria-hidden="true" />
           <span class="brand-copy">
             <strong>FieldTheory for Windows</strong>
-            <small>Private bookmark archive for Windows</small>
+            <small>Local-first bookmark archive</small>
           </span>
         </a>
 
         <div class="masthead-meta">
-          <span class="pill">Issue 04</span>
-          <span class="pill pill-muted">v0.4.1</span>
-          <span class="pill">Windows CLI</span>
+          <span class="meta-chip">Issue 04</span>
+          <span class="meta-chip meta-chip-accent">v0.4.1</span>
+          <span class="meta-chip">Windows CLI</span>
         </div>
 
         <nav class="masthead-links" aria-label="Primary">
-          <a class="text-link" href="#what-it-is">What it is</a>
-          <a class="text-link" href="#install">Install</a>
-          <a class="text-link" href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">Source</a>
+          <a href="#thesis">Thesis</a>
+          <a href="#workflow">Workflow</a>
+          <a href="#install">Install</a>
+          <a href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">Source</a>
         </nav>
       </header>
 
       <main id="content">
-        <section class="cover section" id="top" data-reveal>
-          <div class="cover-copy">
-            <p class="issue-line">Windows archive / local recall</p>
-            <h1>Keep the links you save. Find them later.</h1>
-            <p class="lede">
-              FieldTheory for Windows pulls bookmarks from Chrome or Brave, keeps them on your machine, and lets you
-              search them from the terminal.
+        <section class="hero shell-line" id="top" data-reveal>
+          <div class="hero-copy">
+            <p class="eyebrow">For Windows</p>
+            <h1>Your bookmarks. Kept local. Ready in the terminal.</h1>
+            <p class="hero-body">
+              FieldTheory imports from Chrome and Brave, stores a private local archive, and makes years of saved pages searchable from the command line.
             </p>
 
             <div class="hero-actions">
               <a class="button button-primary" href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">View source</a>
-              <a class="button button-secondary" href="#install">How to install</a>
-              <a class="button button-tertiary" href="#what-it-is">Read the notes</a>
+              <a class="button button-secondary" href="#install">Install</a>
             </div>
-
-            <ul class="proof-pills" aria-label="Key facts">
-              <li>Local by default</li>
-              <li>Windows-ready</li>
-              <li>Chrome + Brave</li>
-              <li>Terminal search</li>
-            </ul>
           </div>
 
-          <aside class="dossier" aria-label="Release summary">
-            <div class="scene-stage" data-scene>
-              <div class="scene-hud">
-                <span>3D archive field</span>
+          <div class="hero-artifact" data-reveal>
+            <div class="artifact-stage" data-scene>
+              <div class="artifact-head">
+                <span>Archive field</span>
                 <span>drag / hover</span>
               </div>
-              <div class="scene-caption">Field theory, rendered as a living object.</div>
-            </div>
-
-            <div class="dossier-head">
-              <span class="micro-label">Current release</span>
-              <span class="release-badge">v0.4.1</span>
-            </div>
-
-            <h2>Install once. Sync once. Keep it local.</h2>
-            <p>
-              Install it once, connect your browser, and keep the archive on your own machine. FieldTheory stays close
-              to the terminal and keeps your data on device.
-            </p>
-
-            <div class="dossier-grid">
-              <div>
-                <span>Version</span>
-                <strong>0.4.1</strong>
+              <div class="artifact-foot">
+                A live field model for a local archive system.
               </div>
-              <div>
-                <span>Platform</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="proof-band shell-line" data-reveal>
+          <div class="proof-item">
+            <span class="proof-label">Source</span>
+            <strong>Chrome + Brave</strong>
+          </div>
+          <div class="proof-item">
+            <span class="proof-label">Storage</span>
+            <strong>Local archive</strong>
+          </div>
+          <div class="proof-item">
+            <span class="proof-label">Query</span>
+            <strong>Terminal search</strong>
+          </div>
+          <div class="proof-item">
+            <span class="proof-label">Runtime</span>
+            <strong>Windows-native</strong>
+          </div>
+        </section>
+
+        <section class="thesis shell-line" id="thesis" data-reveal>
+          <div class="section-kicker">Thesis</div>
+          <div class="thesis-grid">
+            <div class="thesis-side">
+              <span class="rail-label">Why it matters</span>
+            </div>
+            <div class="thesis-main">
+              <h2>Bookmarks are pointers. FieldTheory is memory.</h2>
+              <p>
+                Browser sync keeps links alive. It does not give them structure, recall, or a durable place in your workflow. FieldTheory does.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section class="workflow shell-line" id="workflow" data-reveal>
+          <div class="section-kicker">Workflow</div>
+          <div class="workflow-rail">
+            <article class="step-node">
+              <span class="step-index">01</span>
+              <h3>Import without friction</h3>
+              <p>Point FieldTheory at Chrome or Brave and pull the archive onto your own machine.</p>
+            </article>
+            <article class="step-node">
+              <span class="step-index">02</span>
+              <h3>Search at terminal speed</h3>
+              <p>Query old research, references, and half-remembered pages without digging through tabs or browser history.</p>
+            </article>
+            <article class="step-node">
+              <span class="step-index">03</span>
+              <h3>Keep your archive local</h3>
+              <p>No dashboard, no hosted dependency, no extra layer pretending to be the product.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="technical shell-line" data-reveal>
+          <div class="section-kicker">System</div>
+          <div class="technical-grid">
+            <aside class="technical-rail">
+              <div class="rail-block">
+                <span>Mode</span>
+                <strong>Private</strong>
+              </div>
+              <div class="rail-block">
+                <span>Index</span>
+                <strong>SQLite FTS</strong>
+              </div>
+              <div class="rail-block">
+                <span>Fit</span>
                 <strong>Windows</strong>
               </div>
-              <div>
-                <span>Distribution</span>
-                <strong>npm + source</strong>
-              </div>
-              <div>
-                <span>Focus</span>
-                <strong>Local search</strong>
-              </div>
-            </div>
+            </aside>
 
-            <div class="dossier-note">
-              <p class="micro-label">Working sequence</p>
-              <pre><code>npm install -g fieldtheory-cli-windowsport
+            <div class="technical-main">
+              <h2>Built for local control, not another subscription surface.</h2>
+              <p>
+                FieldTheory stays close to the shell. Install it once, sync the archive, search from the terminal, and keep the data where it belongs.
+              </p>
+
+              <div class="command-well">
+                <div class="command-meta">
+                  <span>Working sequence</span>
+                  <span>Local only</span>
+                </div>
+                <pre><code>npm install -g fieldtheory-cli-windowsport
 ftx doctor
 ftx sync
 ftx search "ai memory"</code></pre>
-            </div>
-          </aside>
-        </section>
-
-        <section class="section rail" data-reveal>
-          <span>Private archive workflow</span>
-          <span>Separate local data directory</span>
-          <span>Searchable SQLite FTS index</span>
-          <span>No hosted account</span>
-        </section>
-
-        <section class="section editorial-grid" id="what-it-is" data-reveal>
-          <article class="editorial-story">
-            <p class="section-label">What it is</p>
-            <h2>A better place for the links you keep saving.</h2>
-            <p>
-              FieldTheory for Windows moves the links you save out of the browser and into a local archive for research,
-              references, and the things worth finding again later.
-            </p>
-          </article>
-
-          <aside class="note-stack">
-            <article class="note-card">
-              <span class="note-kicker">Capture</span>
-              <p>Pull bookmarks from the browser profile you already use.</p>
-            </article>
-            <article class="note-card">
-              <span class="note-kicker">Find</span>
-              <p>Surface old sources, half-remembered links, and research trails fast.</p>
-            </article>
-            <article class="note-card">
-              <span class="note-kicker">Own</span>
-              <p>Keep the archive on your machine, with no account layer in the middle.</p>
-            </article>
-          </aside>
-        </section>
-
-        <section class="section feature-grid" data-reveal>
-          <article class="feature-card">
-            <p class="micro-label">Collect</p>
-            <h3>Bring bookmarks in from the browsers you already use.</h3>
-            <p>Chrome and Brave are handled through the current Windows sync path so the archive stays private and portable.</p>
-          </article>
-          <article class="feature-card">
-            <p class="micro-label">Search</p>
-            <h3>Find what matters fast, from the terminal.</h3>
-            <p>SQLite FTS keeps the archive responsive, with command-line output that fits naturally into shell workflows.</p>
-          </article>
-          <article class="feature-card">
-            <p class="micro-label">Trust</p>
-            <h3>Be clear about what ships.</h3>
-            <p>The page points directly to the repo and install path, with no account layer, no lock-in, and no hidden backend.</p>
-          </article>
-        </section>
-
-        <section class="section method-grid" id="install" data-reveal>
-          <div class="section-heading">
-            <p class="section-label">How it works</p>
-            <h2>Three moves to first search.</h2>
-          </div>
-
-          <div class="method-list">
-            <article class="method-card">
-              <span class="method-index">01</span>
-              <h3>Install.</h3>
-              <p>Use npm to install the current release globally on your Windows machine.</p>
-            </article>
-            <article class="method-card">
-              <span class="method-index">02</span>
-              <h3>Index.</h3>
-              <p>Run the sync workflow to build a local archive from Chrome or Brave, with the data stored on your machine.</p>
-            </article>
-            <article class="method-card">
-              <span class="method-index">03</span>
-              <h3>Search.</h3>
-              <p>Use the CLI from the terminal, or hand the archive off to the rest of your stack when you need to go deeper.</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="section install-sheet" data-reveal>
-          <div class="install-copy">
-            <p class="section-label">Install path</p>
-            <h2>No download bundle. Just the package and the repo.</h2>
-            <p>
-              Distribution stays simple on purpose: npm gives you the package, GitHub gives you the source, and the
-              archive stays local.
-            </p>
-          </div>
-
-          <div class="install-panel">
-            <div class="install-row">
-              <span class="micro-label">Install</span>
-              <a class="copy-button" href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">Open repo</a>
-            </div>
-            <code class="install-command">npm install -g fieldtheory-cli-windowsport</code>
-            <p class="install-note">Then run: ftx doctor · ftx sync · ftx search</p>
-            <div class="install-actions">
-              <a class="button button-secondary button-small" href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">View source</a>
-              <span class="install-hint">Local-first, no extra bundle.</span>
+              </div>
             </div>
           </div>
         </section>
 
-        <section class="section origin-grid" data-reveal>
-          <article class="origin-card">
-            <p class="micro-label">Origin</p>
-            <h3>Started as a fork. Shaped into a Windows-native tool.</h3>
-            <p>
-              This fork keeps the core promise visible: local bookmark recall that is practical enough for daily use and
-              polished enough to feel intentional.
-            </p>
-          </article>
-          <article class="origin-card">
-            <p class="micro-label">Fit</p>
-            <h3>For researchers, builders, and power users.</h3>
-            <p>
-              If you live in the shell and keep a lot of tabs open, this is a quieter way to make the web feel
-              searchable again.
-            </p>
-          </article>
-        </section>
-
-        <section class="section faq-grid" data-reveal>
-          <div class="section-heading">
-            <p class="section-label">FAQ</p>
-            <h2>Short answers for release confidence.</h2>
-          </div>
-
-          <div class="faq-list">
-            <article class="faq-item">
-              <h3>What does FieldTheory actually do?</h3>
-              <p>It turns browser bookmarks into a local archive you can query quickly from the command line.</p>
-            </article>
-            <article class="faq-item">
-              <h3>Where does my data live?</h3>
-              <p>On your machine. The workflow is local-first and avoids a hosted backend or account layer.</p>
-            </article>
-            <article class="faq-item">
-              <h3>Is this a web app?</h3>
-              <p>No. It’s a CLI with a landing page — the site is for the product, the repo, and the install path.</p>
-            </article>
+        <section class="install-band shell-line" id="install" data-reveal>
+          <div class="section-kicker">Install path</div>
+          <div class="install-grid">
+            <div class="install-copy">
+              <h2>No download bundle. Just the package and the repo.</h2>
+              <p>
+                Install FieldTheory for Windows, run a single command, and your browser bookmarks become a searchable local archive. No dashboard, no sync dependency, no extra layer to manage.
+              </p>
+            </div>
+            <div class="install-panel">
+              <div class="install-panel-head">
+                <span>Install</span>
+                <a href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">Open repo</a>
+              </div>
+              <code>npm install -g fieldtheory-cli-windowsport</code>
+              <p>Then run: ftx doctor · ftx sync · ftx search</p>
+            </div>
           </div>
         </section>
 
-        <section class="section final-cta" data-reveal>
-          <div>
-            <p class="section-label">Ready to ship</p>
-            <h2>Install once, keep the archive local, and move on.</h2>
+        <section class="closing shell-line" data-reveal>
+          <div class="closing-copy">
+            <p class="section-kicker">Closing note</p>
+            <h2>FieldTheory for Windows. Local-first bookmark archiving for the command line.</h2>
           </div>
-          <div class="final-actions">
-            <a class="button button-primary" href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">View Source</a>
+          <div class="closing-actions">
+            <a class="button button-primary" href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">View source</a>
             <a class="button button-secondary" href="#install">Install</a>
-            <a class="button button-tertiary" href="#top">Back to top</a>
           </div>
         </section>
       </main>
 
-      <footer class="footer">
-        <p>FieldTheory for Windows v0.4.1 · A Windows-native archive CLI for people who keep serious research in the browser.</p>
+      <footer class="footer shell-line">
+        <p>FieldTheory for Windows v0.4.1 · Windows-native archive CLI for serious research workflows.</p>
         <a href="https://github.com/shangobashi/fieldtheory-cli-windowsport" target="_blank" rel="noreferrer noopener">GitHub</a>
       </footer>
     </div>

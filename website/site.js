@@ -7,13 +7,13 @@ window.addEventListener("DOMContentLoaded", () => {
   initScrollState();
   initReveal();
   initIntro();
-  initCardTilt();
+  initHoverMotion();
+  initBackgroundCanvas();
   initThreeScene();
 });
 
 function initCursorGlow() {
   const root = document.documentElement;
-
   document.addEventListener(
     "pointermove",
     (event) => {
@@ -28,18 +28,13 @@ function initScrollState() {
   const setState = () => {
     document.body.classList.toggle("is-scrolled", window.scrollY > 12);
   };
-
   setState();
   window.addEventListener("scroll", setState, { passive: true });
 }
 
 function initReveal() {
   const elements = Array.from(document.querySelectorAll("[data-reveal]"));
-  if (!elements.length) return;
-
-  if (prefersReducedMotion) {
-    return;
-  }
+  if (!elements.length || prefersReducedMotion) return;
 
   if (hasGSAP) {
     const observer = new IntersectionObserver(
@@ -48,15 +43,15 @@ function initReveal() {
           if (!entry.isIntersecting) return;
           gsap.fromTo(
             entry.target,
-            { y: 28, opacity: 0, filter: "blur(8px)" },
+            { y: 30, opacity: 0, filter: "blur(12px)" },
             { y: 0, opacity: 1, filter: "blur(0px)", duration: 0.95, ease: "power3.out" }
           );
+          entry.target.classList.add("is-visible");
           observer.unobserve(entry.target);
         });
       },
-      { threshold: 0.16, rootMargin: "0px 0px -10% 0px" }
+      { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
     );
-
     elements.forEach((element) => observer.observe(element));
     return;
   }
@@ -69,9 +64,8 @@ function initReveal() {
         observer.unobserve(entry.target);
       });
     },
-    { threshold: 0.16, rootMargin: "0px 0px -10% 0px" }
+    { threshold: 0.12, rootMargin: "0px 0px -8% 0px" }
   );
-
   elements.forEach((element) => observer.observe(element));
 }
 
@@ -79,44 +73,207 @@ function initIntro() {
   if (prefersReducedMotion || !hasGSAP) return;
 
   const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-  tl.from(".masthead", { y: -12, opacity: 0, duration: 0.7 })
-    .from(".issue-line", { y: 12, opacity: 0, duration: 0.5 }, "-=0.2")
-    .from("h1", { y: 24, opacity: 0, duration: 0.8 }, "-=0.05")
-    .from(".lede", { y: 18, opacity: 0, duration: 0.7 }, "-=0.45")
-    .from(".hero-actions", { y: 16, opacity: 0, duration: 0.6 }, "-=0.4")
-    .from(".proof-pills li", { y: 10, opacity: 0, stagger: 0.06, duration: 0.5 }, "-=0.45")
-    .from(".dossier", { x: 24, opacity: 0, duration: 0.9 }, "-=0.75");
+  tl.from(".masthead", { y: -18, opacity: 0, duration: 0.72 })
+    .from(".hero-copy .eyebrow", { y: 14, opacity: 0, duration: 0.5 }, "-=0.28")
+    .from(".hero-copy h1", { y: 26, opacity: 0, duration: 0.86 }, "-=0.08")
+    .from(".hero-body", { y: 18, opacity: 0, duration: 0.76 }, "-=0.48")
+    .from(".hero-actions", { y: 14, opacity: 0, duration: 0.64 }, "-=0.44")
+    .from(".proof-pills li", { y: 10, opacity: 0, stagger: 0.05, duration: 0.48 }, "-=0.4")
+    .from(".dossier", { x: 24, opacity: 0, duration: 0.9 }, "-=0.68");
 }
 
-function initCardTilt() {
+function initHoverMotion() {
   if (prefersReducedMotion || !hasGSAP) return;
 
-  const cards = Array.from(document.querySelectorAll(
-    ".dossier, .feature-card, .method-card, .origin-card, .faq-item, .install-panel, .editorial-story, .note-card"
+  const panels = Array.from(document.querySelectorAll(
+    ".dossier, .install-panel, .command-well, .editorial-story, .note-card, .rail-block, .proof-item, .step-node"
   ));
 
-  cards.forEach((card) => {
-    gsap.set(card, { transformPerspective: 900, transformStyle: "preserve-3d" });
+  panels.forEach((panel) => {
+    gsap.set(panel, { transformPerspective: 1000, transformStyle: "preserve-3d" });
+    const rotX = gsap.quickTo(panel, "rotationX", { duration: 0.35, ease: "power3.out" });
+    const rotY = gsap.quickTo(panel, "rotationY", { duration: 0.35, ease: "power3.out" });
+    const y = gsap.quickTo(panel, "y", { duration: 0.35, ease: "power3.out" });
 
-    const toX = gsap.quickTo(card, "rotationX", { duration: 0.35, ease: "power3.out" });
-    const toY = gsap.quickTo(card, "rotationY", { duration: 0.35, ease: "power3.out" });
-    const glow = gsap.quickTo(card, "boxShadow", { duration: 0.5, ease: "power3.out" });
-
-    card.addEventListener("pointermove", (event) => {
-      const rect = card.getBoundingClientRect();
+    panel.addEventListener("pointermove", (event) => {
+      const rect = panel.getBoundingClientRect();
       const px = (event.clientX - rect.left) / rect.width - 0.5;
       const py = (event.clientY - rect.top) / rect.height - 0.5;
-      toX(py * -4.8);
-      toY(px * 7.2);
-      glow("0 16px 38px rgba(0, 0, 0, 0.34)");
+      rotX(py * -4);
+      rotY(px * 5.8);
+      y(-3);
     });
 
-    card.addEventListener("pointerleave", () => {
-      toX(0);
-      toY(0);
-      glow("0 12px 34px rgba(0, 0, 0, 0.24)");
+    panel.addEventListener("pointerleave", () => {
+      rotX(0);
+      rotY(0);
+      y(0);
     });
   });
+}
+
+function initBackgroundCanvas() {
+  const canvas = document.getElementById("bg-canvas");
+  if (!(canvas instanceof HTMLCanvasElement)) return;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  let width = 0;
+  let height = 0;
+  let hubs = [];
+  let stars = [];
+  let arcs = [];
+  let cursorX = 0.5;
+  let cursorY = 0.24;
+  let targetX = cursorX;
+  let targetY = cursorY;
+
+  function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    buildField();
+  }
+
+  function buildField() {
+    hubs = [
+      { x: width * 0.18, y: height * 0.18, color: "rgba(255,155,107,0.7)" },
+      { x: width * 0.52, y: height * 0.14, color: "rgba(143,231,255,0.72)" },
+      { x: width * 0.82, y: height * 0.24, color: "rgba(139,124,255,0.74)" },
+      { x: width * 0.72, y: height * 0.7, color: "rgba(143,231,255,0.5)" },
+      { x: width * 0.3, y: height * 0.82, color: "rgba(255,155,107,0.45)" },
+    ];
+
+    stars = Array.from({ length: 120 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      r: 0.5 + Math.random() * 1.8,
+      a: 0.08 + Math.random() * 0.2,
+      drift: 0.06 + Math.random() * 0.24,
+    }));
+
+    arcs = Array.from({ length: 16 }, (_, index) => ({
+      hub: index % hubs.length,
+      radius: 90 + Math.random() * Math.min(width, height) * 0.14,
+      start: Math.random() * Math.PI * 2,
+      span: 0.2 + Math.random() * 0.4,
+      speed: 0.00005 + Math.random() * 0.00008,
+      alpha: 0.02 + Math.random() * 0.03,
+      color: index % 2 ? "143,231,255" : "139,124,255",
+    }));
+  }
+
+  function draw(t) {
+    cursorX += (targetX - cursorX) * 0.04;
+    cursorY += (targetY - cursorY) * 0.04;
+
+    ctx.clearRect(0, 0, width, height);
+
+    drawGrid(t);
+    drawArcs(t);
+    drawLinks();
+    drawHubs(t);
+    drawStars(t);
+
+    const glow = ctx.createRadialGradient(cursorX * width, cursorY * height, 0, cursorX * width, cursorY * height, Math.min(width, height) * 0.24);
+    glow.addColorStop(0, "rgba(143,231,255,0.08)");
+    glow.addColorStop(1, "rgba(143,231,255,0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, width, height);
+
+    requestAnimationFrame(draw);
+  }
+
+  function drawGrid(t) {
+    const cell = 96;
+    ctx.save();
+    ctx.lineWidth = 1;
+    for (let x = ((t * 0.01) % cell); x < width; x += cell) {
+      ctx.strokeStyle = "rgba(255,255,255,0.018)";
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+    for (let y = ((t * 0.008) % cell); y < height; y += cell) {
+      ctx.strokeStyle = "rgba(255,255,255,0.014)";
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function drawArcs(t) {
+    arcs.forEach((arc) => {
+      const hub = hubs[arc.hub];
+      const start = arc.start + t * arc.speed;
+      ctx.save();
+      ctx.strokeStyle = `rgba(${arc.color},${arc.alpha})`;
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.arc(hub.x, hub.y, arc.radius, start, start + arc.span);
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  function drawLinks() {
+    for (let i = 0; i < hubs.length; i++) {
+      for (let j = i + 1; j < hubs.length; j++) {
+        const a = hubs[i];
+        const b = hubs[j];
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const d = Math.sqrt(dx * dx + dy * dy);
+        if (d > Math.min(width, height) * 0.5) continue;
+        ctx.strokeStyle = `rgba(255,255,255,${0.03 - d / (Math.min(width, height) * 40)})`;
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  function drawHubs(t) {
+    hubs.forEach((hub, index) => {
+      const pulse = 3 + (Math.sin(t * 0.0012 + index) * 0.5 + 0.5) * 10;
+      const grad = ctx.createRadialGradient(hub.x, hub.y, 0, hub.x, hub.y, pulse * 4.5);
+      grad.addColorStop(0, hub.color);
+      grad.addColorStop(1, "rgba(0,0,0,0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(hub.x, hub.y, pulse * 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = "rgba(255,255,255,0.72)";
+      ctx.beginPath();
+      ctx.arc(hub.x, hub.y, pulse * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function drawStars(t) {
+    stars.forEach((star, index) => {
+      const x = star.x + Math.sin(t * 0.00015 + index) * star.drift;
+      const y = star.y + Math.cos(t * 0.00012 + index) * star.drift;
+      ctx.fillStyle = `rgba(255,255,255,${star.a})`;
+      ctx.beginPath();
+      ctx.arc(x, y, star.r, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  window.addEventListener("pointermove", (event) => {
+    targetX = event.clientX / window.innerWidth;
+    targetY = event.clientY / window.innerHeight;
+  }, { passive: true });
+
+  window.addEventListener("resize", resize);
+  resize();
+  requestAnimationFrame(draw);
 }
 
 function initThreeScene() {
@@ -168,96 +325,34 @@ function initThreeScene() {
     grad.addColorStop(1, "rgba(0,0,0,0)");
     ctx.fillStyle = grad;
     ctx.fillRect(0, 0, 128, 128);
-    const texture = new THREE.CanvasTexture(canvas);
-    texture.needsUpdate = true;
-    return texture;
+    return new THREE.CanvasTexture(canvas);
   }
 
-  const warmGlow = new THREE.Sprite(
-    new THREE.SpriteMaterial({
-      map: radialTexture("rgba(248,214,191,0.96)", "rgba(184,109,79,0.2)"),
-      transparent: true,
-      opacity: 0.78,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    })
-  );
+  const warmGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTexture("rgba(248,214,191,0.96)", "rgba(184,109,79,0.2)"), transparent: true, opacity: 0.78, depthWrite: false, blending: THREE.AdditiveBlending }));
   warmGlow.scale.set(5.6, 5.6, 1);
   warmGlow.position.set(0.16, 0.1, -0.08);
   group.add(warmGlow);
 
-  const coolGlow = new THREE.Sprite(
-    new THREE.SpriteMaterial({
-      map: radialTexture("rgba(160,145,255,0.94)", "rgba(125,103,216,0.2)"),
-      transparent: true,
-      opacity: 0.56,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    })
-  );
+  const coolGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: radialTexture("rgba(160,145,255,0.94)", "rgba(125,103,216,0.2)"), transparent: true, opacity: 0.56, depthWrite: false, blending: THREE.AdditiveBlending }));
   coolGlow.scale.set(5.0, 5.0, 1);
   coolGlow.position.set(-0.2, -0.12, 0.08);
   group.add(coolGlow);
 
-  const core = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(1.26, 3),
-    new THREE.MeshStandardMaterial({
-      color: 0x191614,
-      roughness: 0.2,
-      metalness: 0.95,
-      emissive: 0xb86d4f,
-      emissiveIntensity: 1.45,
-    })
-  );
+  const core = new THREE.Mesh(new THREE.IcosahedronGeometry(1.26, 3), new THREE.MeshStandardMaterial({ color: 0x191614, roughness: 0.2, metalness: 0.95, emissive: 0xb86d4f, emissiveIntensity: 1.45 }));
   group.add(core);
 
-  const halo = new THREE.Mesh(
-    new THREE.SphereGeometry(1.82, 32, 32),
-    new THREE.MeshBasicMaterial({
-      color: 0xb86d4f,
-      transparent: true,
-      opacity: 0.18,
-      wireframe: true,
-      blending: THREE.AdditiveBlending,
-    })
-  );
+  const halo = new THREE.Mesh(new THREE.SphereGeometry(1.82, 32, 32), new THREE.MeshBasicMaterial({ color: 0xb86d4f, transparent: true, opacity: 0.18, wireframe: true, blending: THREE.AdditiveBlending }));
   group.add(halo);
 
-  const wire = new THREE.Mesh(
-    new THREE.OctahedronGeometry(2.04, 1),
-    new THREE.MeshBasicMaterial({
-      color: 0xb86d4f,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.42,
-      blending: THREE.AdditiveBlending,
-    })
-  );
+  const wire = new THREE.Mesh(new THREE.OctahedronGeometry(2.04, 1), new THREE.MeshBasicMaterial({ color: 0xb86d4f, wireframe: true, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending }));
   group.add(wire);
 
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(2.5, 0.08, 12, 150),
-    new THREE.MeshStandardMaterial({
-      color: 0x8c7cff,
-      roughness: 0.16,
-      metalness: 0.5,
-      emissive: 0x22182e,
-      emissiveIntensity: 1.4,
-    })
-  );
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(2.5, 0.08, 12, 150), new THREE.MeshStandardMaterial({ color: 0x8c7cff, roughness: 0.16, metalness: 0.5, emissive: 0x22182e, emissiveIntensity: 1.4 }));
   ring.rotation.x = Math.PI * 0.44;
   ring.rotation.y = Math.PI * 0.18;
   group.add(ring);
 
-  const ring2 = new THREE.Mesh(
-    new THREE.TorusGeometry(1.74, 0.06, 10, 160),
-    new THREE.MeshBasicMaterial({
-      color: 0xf5e7d9,
-      transparent: true,
-      opacity: 0.34,
-      blending: THREE.AdditiveBlending,
-    })
-  );
+  const ring2 = new THREE.Mesh(new THREE.TorusGeometry(1.74, 0.06, 10, 160), new THREE.MeshBasicMaterial({ color: 0xf5e7d9, transparent: true, opacity: 0.34, blending: THREE.AdditiveBlending }));
   ring2.rotation.x = Math.PI * 0.26;
   ring2.rotation.z = Math.PI * 0.42;
   group.add(ring2);
@@ -272,13 +367,7 @@ function initThreeScene() {
     linePositions[i * 3 + 2] = Math.sin(angle) * r * 0.14;
   }
   lineGeo.setAttribute("position", new THREE.BufferAttribute(linePositions, 3));
-  const lineMat = new THREE.LineBasicMaterial({
-    color: 0xf0d6ba,
-    transparent: true,
-    opacity: 0.42,
-    blending: THREE.AdditiveBlending,
-  });
-  const orbitLine = new THREE.LineLoop(lineGeo, lineMat);
+  const orbitLine = new THREE.LineLoop(lineGeo, new THREE.LineBasicMaterial({ color: 0xf0d6ba, transparent: true, opacity: 0.42, blending: THREE.AdditiveBlending }));
   orbitLine.rotation.x = Math.PI * 0.12;
   orbitLine.rotation.z = Math.PI * 0.08;
   group.add(orbitLine);
@@ -301,20 +390,10 @@ function initThreeScene() {
     colors[i * 3 + 1] = mix.g;
     colors[i * 3 + 2] = mix.b;
   }
-
   const particleGeo = new THREE.BufferGeometry();
   particleGeo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
   particleGeo.setAttribute("color", new THREE.BufferAttribute(colors, 3));
-  const particleMat = new THREE.PointsMaterial({
-    size: 0.055,
-    vertexColors: true,
-    transparent: true,
-    opacity: 0.9,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-    sizeAttenuation: true,
-  });
-  const particles = new THREE.Points(particleGeo, particleMat);
+  const particles = new THREE.Points(particleGeo, new THREE.PointsMaterial({ size: 0.055, vertexColors: true, transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true }));
   group.add(particles);
 
   const sparkGeo = new THREE.BufferGeometry();
@@ -325,19 +404,9 @@ function initThreeScene() {
     sparkPositions[i * 3 + 2] = (Math.random() - 0.5) * 6.2;
   }
   sparkGeo.setAttribute("position", new THREE.BufferAttribute(sparkPositions, 3));
-  const sparkMat = new THREE.PointsMaterial({
-    size: 0.03,
-    color: 0xf4efe2,
-    transparent: true,
-    opacity: 0.52,
-    depthWrite: false,
-    blending: THREE.AdditiveBlending,
-  });
-  const sparks = new THREE.Points(sparkGeo, sparkMat);
+  const sparks = new THREE.Points(sparkGeo, new THREE.PointsMaterial({ size: 0.03, color: 0xf4efe2, transparent: true, opacity: 0.52, depthWrite: false, blending: THREE.AdditiveBlending }));
   group.add(sparks);
 
-  let width = 0;
-  let height = 0;
   let targetRotX = 0;
   let targetRotY = 0;
   let pointerX = 0;
@@ -345,10 +414,8 @@ function initThreeScene() {
 
   function resize() {
     const rect = host.getBoundingClientRect();
-    width = Math.max(1, Math.floor(rect.width));
-    height = Math.max(1, Math.floor(rect.height));
-    renderer.setSize(width, height, false);
-    camera.aspect = width / height;
+    renderer.setSize(Math.max(1, Math.floor(rect.width)), Math.max(1, Math.floor(rect.height)), false);
+    camera.aspect = rect.width / rect.height;
     camera.updateProjectionMatrix();
   }
 
@@ -368,7 +435,6 @@ function initThreeScene() {
   });
 
   const clock = new THREE.Clock();
-
   function animate() {
     const elapsed = clock.getElapsedTime();
     group.rotation.y += (targetRotY - group.rotation.y) * 0.055;
