@@ -191,17 +191,18 @@ code,
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   text-decoration: none;
 }
 
 .brand-logo {
-  width: 44px;
-  height: 44px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  padding: 8px;
-  background: rgba(255, 255, 255, 0.03);
+  width: 52px;
+  height: 52px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 5px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset, 0 12px 28px rgba(0, 0, 0, 0.22);
 }
 
 .brand-copy {
