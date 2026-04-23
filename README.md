@@ -179,25 +179,12 @@ Install from a local checkout:
 
 
 ```bash
-
-
-
 npm install
 
-
-
 npm run build
-
-
-
 npm install -g .
 
-
-
 ftx --help
-
-
-
 ```
 
 
