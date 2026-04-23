@@ -1,29 +1,19 @@
-<svg width="272" height="46" viewBox="0 0 272 46" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="248" height="40" viewBox="0 0 248 40" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="wordGradientDark" x1="0" y1="7" x2="272" y2="39" gradientUnits="userSpaceOnUse">
+    <linearGradient id="ftWordDark" x1="0" y1="7" x2="248" y2="33" gradientUnits="userSpaceOnUse">
       <stop stop-color="#132033"/>
-      <stop offset="0.6" stop-color="#24364C"/>
-      <stop offset="1" stop-color="#5B7CA3"/>
+      <stop offset="0.62" stop-color="#25374D"/>
+      <stop offset="1" stop-color="#5E7FA5"/>
     </linearGradient>
   </defs>
 
-  <g fill="url(#wordGradientDark)">
-    <path d="M8 9H36V15H15V22H32V28H15V38H8V9Z"/>
-    <path d="M44 9H51V20H64V9H71V38H64V26H51V38H44V9Z"/>
-    <path d="M81 9H88V38H81V9Z"/>
-    <path d="M98 9H126V15H115V38H108V15H98V9Z"/>
-    <path d="M145.5 9H152.5L164.5 38H157.1L154.4 31H143.2L140.5 38H133.1L145.5 9ZM145.4 25.4H152.2L148.8 16.3L145.4 25.4Z"/>
-    <path d="M170 9H177L188.6 26.7V9H195.3V38H188.5L176.7 20.1V38H170V9Z"/>
-    <path d="M203 9H210V38H203V9Z"/>
-    <path d="M220 9H248V15H237V38H230V15H220V9Z"/>
-    <path d="M256 9H263V38H256V9Z"/>
-    <path d="M39.5 6.5H46.5V13.5H39.5V6.5Z"/>
-    <path d="M39.5 17.5H46.5V24.5H39.5V17.5Z" opacity="0.82"/>
-    <path d="M39.5 28.5H46.5V35.5H39.5V28.5Z" opacity="0.64"/>
-    <path d="M127.5 6.5H134.5V13.5H127.5V35.5H120.5V28.5H127.5V6.5Z"/>
-    <path d="M196.5 6.5H203.5V13.5H196.5V6.5Z"/>
-    <path d="M196.5 17.5H203.5V24.5H196.5V17.5Z" opacity="0.82"/>
-    <path d="M196.5 28.5H203.5V35.5H196.5V28.5Z" opacity="0.64"/>
-    <path d="M248.5 6.5H255.5V13.5H248.5V35.5H241.5V28.5H248.5V6.5Z"/>
+  <g fill="url(#ftWordDark)">
+    <text x="0" y="28" font-family="Geist, Inter, Arial, sans-serif" font-size="28" font-weight="600" letter-spacing="-0.06em">FieldTheory</text>
+  </g>
+
+  <g opacity="0.92">
+    <rect x="220" y="8" width="20" height="20" rx="6" stroke="url(#ftWordDark)" stroke-width="2.4"/>
+    <path d="M225 14H237" stroke="url(#ftWordDark)" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M225 20H233" stroke="url(#ftWordDark)" stroke-width="2.4" stroke-linecap="round"/>
   </g>
 </svg>
