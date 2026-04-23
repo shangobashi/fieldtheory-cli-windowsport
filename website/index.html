@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="FieldTheory for Windows v0.4.6 is a local-first bookmark archive for Windows. Import Chrome and Brave bookmarks, index them with SQLite FTS, and search them from the terminal."
+      content="FieldTheory for Windows v0.4.7 is a local-first X/Twitter bookmark archive for Windows. Use your Chrome or Brave session to sync bookmarks from X, index them with SQLite FTS, and search them from the terminal."
     />
     <meta name="theme-color" content="#05070b" />
-    <title>FieldTheory for Windows v0.4.6</title>
+    <title>FieldTheory for Windows v0.4.7</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -38,12 +38,12 @@
           <img class="brand-logo" src="./images/fieldtheory-logo-white.png" alt="" aria-hidden="true" />
           <span class="brand-copy">
             <strong>FieldTheory for Windows</strong>
-            <small>Local-first bookmark archive</small>
+            <small>Local-first X/Twitter bookmark archive</small>
           </span>
         </a>
 
         <div class="release-strip" aria-label="Release metadata">
-          <span>v0.4.6</span>
+          <span>v0.4.7</span>
           <span>Windows CLI</span>
           <span>SQLite FTS</span>
         </div>
@@ -68,11 +68,11 @@
         <section class="hero" data-reveal>
           <div class="hero-copy">
             <p class="eyebrow">FieldTheory for Windows</p>
-            <h1>A local-first bookmark archive for the Windows terminal.</h1>
+            <h1>A local-first X/Twitter bookmark archive for the Windows terminal.</h1>
             <p class="hero-body">
-              Import bookmarks from Chrome or Brave, store them in SQLite with full-text search,
-              and query everything from the CLI. No hosted account. No sync service. Just your
-              archive, on your machine.
+              Use your logged-in Chrome or Brave session to sync bookmarks from X/Twitter, store
+              them in SQLite with full-text search, and query everything from the CLI. No hosted
+              layer. No remote index. Just your archive, on your machine.
             </p>
 
             <div class="hero-actions">
@@ -81,9 +81,9 @@
             </div>
 
             <div class="hero-proof" aria-label="Product proof points">
-              <span>Chrome + Brave import</span>
+              <span>Chrome / Brave session support</span>
+              <span>X/Twitter bookmark sync</span>
               <span>SQLite FTS index</span>
-              <span>Local-only workflow</span>
               <span>Source on GitHub</span>
             </div>
           </div>
@@ -100,9 +100,9 @@
             <div class="terminal-body">
               <div class="terminal-line is-active">&gt; npm install -g fieldtheory-cli-windowsport</div>
               <div class="terminal-line">&gt; ftx doctor</div>
-              <div class="terminal-line">system: ready · sqlite: ready · browser import: ready</div>
+              <div class="terminal-line">system: ready · sqlite: ready · browser session: ready</div>
               <div class="terminal-line">&gt; ftx sync</div>
-              <div class="terminal-line">imported 1,248 bookmarks from Chrome + Brave</div>
+              <div class="terminal-line">synced 1,248 X/Twitter bookmarks into the local archive</div>
               <div class="terminal-line">&gt; ftx search "design systems"</div>
               <div class="terminal-line terminal-line-result">
                 12 matches · a16z design systems · linear docs · resend patterns · stripe layout notes
@@ -117,8 +117,8 @@
             <strong>npm package</strong>
           </div>
           <div>
-            <span class="proof-label">Platform</span>
-            <strong>Windows-first workflow</strong>
+            <span class="proof-label">Auth path</span>
+            <strong>Chrome / Brave session</strong>
           </div>
           <div>
             <span class="proof-label">Storage</span>
@@ -133,17 +133,17 @@
         <section class="statement frame-line" id="why" data-reveal>
           <div class="section-intro">
             <p class="section-label">Why</p>
-            <h2>Bookmarks are usually saved. They are rarely retrievable.</h2>
+            <h2>X bookmarks are easy to save. They are hard to retrieve.</h2>
           </div>
           <div class="statement-copy">
             <p>
-              FieldTheory turns browser bookmarks into a searchable local archive. Instead of
-              leaving links scattered across folders and browser profiles, it brings them into a
+              FieldTheory turns X/Twitter bookmarks into a searchable local archive. Instead of
+              leaving saved posts buried behind one scrolling interface, it brings them into a
               command-line workflow designed for Windows.
             </p>
             <p>
-              The point is not another dashboard. The point is getting old links back fast, with
-              the archive still under your control.
+              The point is not another dashboard. The point is getting saved links, threads, and
+              references back fast, with the archive still under your control.
             </p>
           </div>
         </section>
@@ -157,8 +157,8 @@
           <div class="flow-grid">
             <article class="flow-step">
               <span class="flow-index">01</span>
-              <h3>Import</h3>
-              <p>Pull bookmarks from Chrome or Brave into one local archive.</p>
+              <h3>Sync</h3>
+              <p>Use your Chrome or Brave X session to pull bookmarks into one local archive.</p>
             </article>
             <article class="flow-step">
               <span class="flow-index">02</span>
@@ -168,7 +168,7 @@
             <article class="flow-step">
               <span class="flow-index">03</span>
               <h3>Search</h3>
-              <p>Find saved links from the Windows terminal when you actually need them.</p>
+              <p>Find saved posts and links from the Windows terminal when you actually need them.</p>
             </article>
           </div>
         </section>
@@ -182,28 +182,28 @@
           <div class="usage-grid">
             <div class="usage-list" role="list" aria-label="Capabilities">
               <article class="usage-row" role="listitem">
-                <span>Browser import</span>
-                <p>Bring in existing bookmarks from Chrome and Brave without rebuilding anything by hand.</p>
+                <span>X/Twitter bookmark sync</span>
+                <p>Sync your saved X/Twitter bookmarks into a local archive with the <code>ftx sync</code> command.</p>
               </article>
               <article class="usage-row" role="listitem">
-                <span>Local SQLite storage</span>
-                <p>Your archive stays in a format that is durable, inspectable, and portable.</p>
+                <span>Chrome / Brave session support</span>
+                <p>Use your logged-in browser session for authentication, including the Windows DevTools fallback path when needed.</p>
               </article>
               <article class="usage-row" role="listitem">
-                <span>Full-text terminal search</span>
-                <p>Query bookmarks quickly from the CLI using SQLite FTS.</p>
+                <span>Local SQLite storage + search</span>
+                <p>Store everything locally and query it quickly from the CLI using SQLite FTS.</p>
               </article>
               <article class="usage-row" role="listitem">
-                <span>No account layer</span>
-                <p>No hosted dashboard, no login wall, and no dependency on a remote sync surface.</p>
+                <span>Classification + exploration</span>
+                <p>List, inspect, classify, and visualize the archive once it has been synced locally.</p>
               </article>
             </div>
 
             <aside class="usage-panel">
               <p class="usage-panel-label">Local means local</p>
               <p>
-                FieldTheory is not a hosted bookmarking service. It runs locally, stores data in
-                SQLite, and keeps the workflow in your terminal.
+                FieldTheory is not a hosted bookmarking service. It uses your local browser session
+                to sync X/Twitter bookmarks, stores them in SQLite, and keeps the workflow in your terminal.
               </p>
               <dl class="meta-list">
                 <div>
@@ -230,9 +230,9 @@
         <section class="install frame-line" id="install" data-reveal>
           <div class="section-intro">
             <p class="section-label">Install</p>
-            <h2>Archive your bookmarks. Search them locally.</h2>
+            <h2>Sync your X/Twitter bookmarks. Search them locally.</h2>
             <p class="install-copy">
-              Install the package, run the doctor command, sync the archive, and start searching
+              Install the package, run the doctor command, sync your bookmarks from X/Twitter, and start searching
               from the terminal.
             </p>
           </div>
@@ -261,7 +261,7 @@
 
       <footer class="footer frame-line">
         <div class="footer-copy">
-          <p>FieldTheory for Windows v0.4.6 · local-first bookmark archiving for the Windows terminal.</p>
+          <p>FieldTheory for Windows v0.4.7 · local-first X/Twitter bookmark archiving for the Windows terminal.</p>
           <p class="footer-meta">Created by Shango Bashi · MIT License · Inspired by Andrew Farah’s original Field Theory.</p>
         </div>
         <a
