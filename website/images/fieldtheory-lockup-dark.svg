@@ -1,35 +1,22 @@
-<svg width="240" height="52" viewBox="0 0 240 52" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="260" height="52" viewBox="0 0 260 52" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="fieldGradientDark" x1="8" y1="8" x2="54" y2="44" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#0E1623"/>
-      <stop offset="0.58" stop-color="#22344B"/>
-      <stop offset="1" stop-color="#4C6C91"/>
+    <linearGradient id="moduleStrokeDark" x1="10" y1="9" x2="58" y2="43" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#142033"/>
+      <stop offset="1" stop-color="#557296"/>
     </linearGradient>
-    <radialGradient id="coreGlowDark" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(31 26) rotate(90) scale(10)">
-      <stop stop-color="#ABC5EB" stop-opacity="0.28"/>
-      <stop offset="0.52" stop-color="#7EA4D8" stop-opacity="0.12"/>
-      <stop offset="1" stop-color="#7EA4D8" stop-opacity="0"/>
-    </radialGradient>
   </defs>
 
   <g>
-    <path d="M8 19.5C12.2 13 18.7 10 27.8 10" stroke="url(#fieldGradientDark)" stroke-width="3" stroke-linecap="round"/>
-    <path d="M8 26C13.8 18.9 20.5 16.2 27.8 16.2" stroke="url(#fieldGradientDark)" stroke-width="3" stroke-linecap="round" opacity="0.92"/>
-    <path d="M8 32.5C12.2 39 18.7 42 27.8 42" stroke="url(#fieldGradientDark)" stroke-width="3" stroke-linecap="round"/>
-
-    <path d="M54 19.5C49.8 13 43.3 10 34.2 10" stroke="url(#fieldGradientDark)" stroke-width="3" stroke-linecap="round"/>
-    <path d="M54 26C48.2 18.9 41.5 16.2 34.2 16.2" stroke="url(#fieldGradientDark)" stroke-width="3" stroke-linecap="round" opacity="0.92"/>
-    <path d="M54 32.5C49.8 39 43.3 42 34.2 42" stroke="url(#fieldGradientDark)" stroke-width="3" stroke-linecap="round"/>
-
-    <path d="M8 25.8C13.8 33 20.5 35.8 27.8 35.8" stroke="url(#fieldGradientDark)" stroke-width="3" stroke-linecap="round" opacity="0.92"/>
-    <path d="M54 25.8C48.2 33 41.5 35.8 34.2 35.8" stroke="url(#fieldGradientDark)" stroke-width="3" stroke-linecap="round" opacity="0.92"/>
-
-    <circle cx="31" cy="26" r="9.8" fill="url(#coreGlowDark)"/>
-    <circle cx="31" cy="26" r="3.4" fill="#23364E"/>
-    <circle cx="31" cy="26" r="1.25" fill="#F7FAFF"/>
+    <rect x="8.5" y="9.5" width="52" height="33" rx="9.5" stroke="url(#moduleStrokeDark)" stroke-width="3"/>
+    <path d="M19 19H50" stroke="url(#moduleStrokeDark)" stroke-width="3" stroke-linecap="round"/>
+    <path d="M19 26H42" stroke="url(#moduleStrokeDark)" stroke-width="3" stroke-linecap="round" opacity="0.92"/>
+    <path d="M19 33H34" stroke="url(#moduleStrokeDark)" stroke-width="3" stroke-linecap="round" opacity="0.78"/>
+    <path d="M29 18V35" stroke="#152233" stroke-width="3.8" stroke-linecap="round"/>
+    <path d="M29 18H43.5" stroke="#152233" stroke-width="3.8" stroke-linecap="round"/>
+    <path d="M44 18V35" stroke="#152233" stroke-width="3.8" stroke-linecap="round"/>
   </g>
 
   <g fill="#111B28">
-    <text x="72" y="31" font-family="Geist, Inter, Arial, sans-serif" font-size="24" font-weight="600" letter-spacing="-0.06em">FieldTheory</text>
+    <text x="76" y="31" font-family="Geist, Inter, Arial, sans-serif" font-size="24" font-weight="600" letter-spacing="-0.06em">FieldTheory</text>
   </g>
 </svg>
