@@ -1,19 +1,19 @@
-<svg width="248" height="40" viewBox="0 0 248 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="258" height="40" viewBox="0 0 258 40" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="ftWord" x1="0" y1="7" x2="248" y2="33" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F7FAFF"/>
-      <stop offset="0.62" stop-color="#E7EEF8"/>
-      <stop offset="1" stop-color="#ADC3E4"/>
+    <linearGradient id="ftMarkLight" x1="0" y1="6" x2="258" y2="34" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8FBFF"/>
+      <stop offset="0.62" stop-color="#E8EFF9"/>
+      <stop offset="1" stop-color="#A9C2E4"/>
     </linearGradient>
   </defs>
 
-  <g fill="url(#ftWord)">
-    <text x="0" y="28" font-family="Geist, Inter, Arial, sans-serif" font-size="28" font-weight="600" letter-spacing="-0.06em">FieldTheory</text>
-  </g>
-
-  <g opacity="0.92">
-    <rect x="220" y="8" width="20" height="20" rx="6" stroke="url(#ftWord)" stroke-width="2.4"/>
-    <path d="M225 14H237" stroke="url(#ftWord)" stroke-width="2.4" stroke-linecap="round"/>
-    <path d="M225 20H233" stroke="url(#ftWord)" stroke-width="2.4" stroke-linecap="round"/>
+  <g fill="url(#ftMarkLight)" stroke="url(#ftMarkLight)" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 8.5V32" stroke-width="4.2"/>
+    <path d="M8 10H31" stroke-width="4.2"/>
+    <path d="M8 20H23.5" stroke-width="4.2"/>
+    <path d="M3 14.5C8.5 11.6 13.2 10.4 18.3 10.4" stroke-width="2.6" opacity="0.88"/>
+    <path d="M3 20C8.2 18.3 12.6 17.7 17.6 17.7" stroke-width="2.6" opacity="0.76"/>
+    <path d="M3 25.5C7.8 24.9 11.9 24.8 16.7 25.4" stroke-width="2.6" opacity="0.64"/>
+    <text x="35" y="28" font-family="Geist, Inter, Arial, sans-serif" font-size="28" font-weight="600" letter-spacing="-0.06em" stroke="none">ieldTheory</text>
   </g>
 </svg>

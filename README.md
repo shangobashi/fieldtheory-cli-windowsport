@@ -1,4 +1,4 @@
-# FieldTheory v0.4.12 for Windows
+# FieldTheory v0.4.13 for Windows
 
 
 
@@ -22,7 +22,7 @@ It syncs your X/Twitter bookmarks into a local cache, builds a local SQLite FTS 
 
 
 
-## What's New in v0.4.12
+## What's New in v0.4.13
 
 
 
