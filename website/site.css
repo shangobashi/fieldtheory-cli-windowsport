@@ -191,35 +191,14 @@ code,
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 14px;
   text-decoration: none;
 }
 
-.brand-logo {
-  width: 52px;
-  height: 52px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 14px;
-  padding: 5px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.02));
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.02) inset, 0 12px 28px rgba(0, 0, 0, 0.22);
-}
-
-.brand-copy {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.brand-copy strong {
-  font-size: 0.95rem;
-  font-weight: 600;
-  letter-spacing: -0.03em;
-}
-
-.brand-copy small {
-  color: var(--subtle);
-  font-size: 0.81rem;
+.brand-lockup {
+  width: 214px;
+  height: auto;
+  display: block;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.22));
 }
 
 .release-strip,
