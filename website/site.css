@@ -504,7 +504,11 @@ code,
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
-  padding: 0 0 44px;
+  padding: 14px 0 44px;
+}
+
+.proof-band.frame-line::before {
+  display: none;
 }
 
 .proof-band > div {
