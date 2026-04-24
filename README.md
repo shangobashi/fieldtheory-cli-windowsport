@@ -1,12 +1,13 @@
-# FieldTheory v0.4.15 for Windows
+# FieldTheory v0.5.1 for Windows
 FieldTheory for Windows is a Windows-focused fork inspired by **FieldTheory by Andrew Farah**
 It syncs your X/Twitter bookmarks into a local cache, builds a local SQLite FTS index, and exposes a CLI that works well with shell-driven agents such as Codex.
 
-## What's New in v0.4.15
+## What's New in v0.5.1
 - **Full sync by default**: `ftx sync` now fetches all bookmarks from the beginning (use `--incremental` for incremental mode)
 - **Chrome & Brave support**: Auto-detects Chrome or Brave browser
 - **DevTools Protocol fallback**: For newer browsers with v20 encryption, uses Chrome DevTools Protocol to extract cookies directly
 - **16,668+ bookmarks synced**: Full history from 2012 to present
+- **Security hardening**: See `SECURITY-HARDENING.md` for v0.5.1 hardening details and residual risks
 
 ## Inspiration
 
@@ -72,8 +73,9 @@ FieldTheory supports both **Google Chrome** and **Brave Browser**:
 
 To use DevTools Protocol:
 
-1. Start your browser with: `brave.exe --remote-debugging-port=9222` or `chrome.exe --remote-debugging-port=9222`
-2. Run `ftx sync` — it will automatically use DevTools Protocol if standard extraction fails
+1. Start your browser with: `brave.exe --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222` or `chrome.exe --remote-debugging-address=127.0.0.1 --remote-debugging-port=9222`
+2. Keep DevTools bound to loopback only (`127.0.0.1` / `localhost`) and do not expose the debugging port on LAN interfaces.
+3. Run `ftx sync` — it will automatically use DevTools Protocol if standard extraction fails.
 
 ## Commands
 | Command | Description |

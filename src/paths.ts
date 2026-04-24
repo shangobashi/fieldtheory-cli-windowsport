@@ -3,15 +3,17 @@ import os from 'node:os';
 import fs from 'node:fs';
 import { restrictWindowsAcl } from './windows-acl.js';
 
+export const SENSITIVE_PATH_MODE = 0o700;
+
 export function dataDir(): string {
   const override = process.env.FTX_DATA_DIR;
   if (override) return override;
   return path.join(os.homedir(), '.ftx-bookmarks');
 }
 
-function ensureDirSync(dir: string): void {
+export function ensureSensitivePathSync(dir: string): void {
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true, mode: 0o700 });
+    fs.mkdirSync(dir, { recursive: true, mode: SENSITIVE_PATH_MODE });
   }
 
   if (process.platform === 'win32') {
@@ -19,7 +21,7 @@ function ensureDirSync(dir: string): void {
       restrictWindowsAcl(dir, true);
     } catch (error) {
       process.stderr.write(
-        `Warning: could not restrict ACL on data directory: ${
+        `Warning: could not restrict ACL on sensitive directory: ${
           error instanceof Error ? error.message : String(error)
         }\n`
       );
@@ -29,7 +31,7 @@ function ensureDirSync(dir: string): void {
 
 export function ensureDataDir(): string {
   const dir = dataDir();
-  ensureDirSync(dir);
+  ensureSensitivePathSync(dir);
   return dir;
 }
 

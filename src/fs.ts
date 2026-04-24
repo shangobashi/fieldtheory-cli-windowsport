@@ -1,7 +1,41 @@
-import { access, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
+import readline from 'node:readline';
+import { restrictWindowsAcl } from './windows-acl.js';
+
+export const SENSITIVE_DIR_MODE = 0o700;
+export const MAX_JSON_FILE_BYTES = 32 * 1024 * 1024;
+export const MAX_JSONL_FILE_BYTES = 128 * 1024 * 1024;
+
+function asErrno(error: unknown): NodeJS.ErrnoException | null {
+  return typeof error === 'object' && error !== null ? (error as NodeJS.ErrnoException) : null;
+}
+
+async function assertFileSizeWithinLimit(filePath: string, maxBytes: number, label: string): Promise<void> {
+  const info = await stat(filePath);
+  if (info.size > maxBytes) {
+    throw new Error(`${label} exceeds size limit (${info.size} bytes > ${maxBytes} bytes): ${filePath}`);
+  }
+}
 
 export async function ensureDir(dirPath: string): Promise<void> {
   await mkdir(dirPath, { recursive: true });
+}
+
+export async function ensureSensitiveDir(
+  dirPath: string,
+  options: {
+    platform?: NodeJS.Platform;
+    restrictAcl?: (targetPath: string, isDirectory?: boolean) => void;
+  } = {}
+): Promise<void> {
+  await mkdir(dirPath, { recursive: true, mode: SENSITIVE_DIR_MODE });
+
+  const platform = options.platform ?? process.platform;
+  if (platform === 'win32') {
+    const restrictAcl = options.restrictAcl ?? restrictWindowsAcl;
+    restrictAcl(dirPath, true);
+  }
 }
 
 export async function pathExists(filePath: string): Promise<boolean> {
@@ -26,6 +60,7 @@ export async function writeJson(filePath: string, value: unknown): Promise<void>
 }
 
 export async function readJson<T>(filePath: string): Promise<T> {
+  await assertFileSizeWithinLimit(filePath, MAX_JSON_FILE_BYTES, 'JSON file');
   const raw = await readFile(filePath, 'utf8');
   return JSON.parse(raw) as T;
 }
@@ -37,13 +72,36 @@ export async function writeJsonLines(filePath: string, rows: unknown[]): Promise
 
 export async function readJsonLines<T>(filePath: string): Promise<T[]> {
   try {
-    const raw = await readFile(filePath, 'utf8');
-    return raw
-      .split('\n')
-      .map((line) => line.trim())
-      .filter(Boolean)
-      .map((line) => JSON.parse(line) as T);
-  } catch {
-    return [];
+    await assertFileSizeWithinLimit(filePath, MAX_JSONL_FILE_BYTES, 'JSONL file');
+  } catch (error) {
+    const errno = asErrno(error);
+    if (errno?.code === 'ENOENT') return [];
+    throw error;
   }
+
+  const rows: T[] = [];
+  const stream = createReadStream(filePath, { encoding: 'utf8' });
+  const rl = readline.createInterface({
+    input: stream,
+    crlfDelay: Infinity,
+  });
+
+  let lineNumber = 0;
+  try {
+    for await (const line of rl) {
+      lineNumber += 1;
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      try {
+        rows.push(JSON.parse(trimmed) as T);
+      } catch (error) {
+        const detail = error instanceof Error ? error.message : String(error);
+        throw new Error(`Invalid JSON on line ${lineNumber} in ${filePath}: ${detail}`);
+      }
+    }
+  } finally {
+    rl.close();
+  }
+
+  return rows;
 }

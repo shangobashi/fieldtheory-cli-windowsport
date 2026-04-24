@@ -3,7 +3,15 @@ import assert from 'node:assert/strict';
 import { mkdtemp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { buildIndex, searchBookmarks, getStats, formatSearchResults } from '../src/bookmarks-db.js';
+import {
+  assertAllowedBookmarkStatsColumn,
+  buildIndex,
+  formatSearchResults,
+  getFieldCounts,
+  getStats,
+  sampleByField,
+  searchBookmarks,
+} from '../src/bookmarks-db.js';
 
 async function setupFixture(): Promise<string> {
   const cwd = await mkdtemp(path.join(tmpdir(), 'ftx-db-'));
@@ -80,6 +88,36 @@ test('getStats returns correct aggregate data', async () => {
     assert.equal(stats.topAuthors[0].count, 2);
     assert.equal(stats.languageBreakdown[0].language, 'en');
     assert.equal(stats.languageBreakdown[0].count, 3);
+  });
+});
+
+test('bookmark stats column validator accepts only allowlisted identifiers', () => {
+  assert.equal(assertAllowedBookmarkStatsColumn('primary_category'), 'primary_category');
+  assert.equal(assertAllowedBookmarkStatsColumn('domains'), 'domains');
+  assert.throws(() => assertAllowedBookmarkStatsColumn('primary_category; DROP TABLE bookmarks; --'), /Unsupported bookmark stats column/);
+});
+
+test('getFieldCounts and sampleByField reject invalid columns before SQL execution', async () => {
+  await withFixture(async () => {
+    await buildIndex();
+
+    await assert.rejects(
+      () => getFieldCounts('author_handle' as never),
+      /Unsupported bookmark stats column/
+    );
+
+    await assert.rejects(
+      () => sampleByField('author_handle' as never, 'alice', 5),
+      /Unsupported bookmark stats column/
+    );
+  });
+});
+
+test('allowlisted getFieldCounts query executes and returns data', async () => {
+  await withFixture(async () => {
+    await buildIndex();
+    const counts = await getFieldCounts('primary_category');
+    assert.equal(counts.unclassified, 3);
   });
 });
 

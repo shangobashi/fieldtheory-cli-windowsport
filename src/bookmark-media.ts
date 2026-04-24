@@ -1,7 +1,7 @@
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { writeFile } from 'node:fs/promises';
-import { ensureDir, pathExists, readJson, readJsonLines, writeJson } from './fs.js';
+import { ensureSensitiveDir, pathExists, readJson, readJsonLines, writeJson } from './fs.js';
 import { bookmarkMediaDir, bookmarkMediaManifestPath, twitterBookmarksCachePath } from './paths.js';
 import type { BookmarkRecord } from './types.js';
 
@@ -11,6 +11,14 @@ const ALLOWED_MEDIA_HOSTNAMES = new Set([
   'ton.twimg.com',
   'abs.twimg.com',
 ]);
+
+const CONTENT_TYPE_EXTENSION_ALLOWLIST: Record<string, string> = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/gif': '.gif',
+  'image/webp': '.webp',
+  'video/mp4': '.mp4',
+};
 
 export function validateMediaUrl(raw: string): URL {
   let parsed: URL;
@@ -38,6 +46,12 @@ export function validateMediaUrl(raw: string): URL {
   }
 
   return parsed;
+}
+
+export function sanitizeExtFromContentType(contentType?: string): string {
+  const normalized = contentType?.split(';', 1)[0]?.trim().toLowerCase();
+  if (!normalized) return '.bin';
+  return CONTENT_TYPE_EXTENSION_ALLOWLIST[normalized] ?? '.bin';
 }
 
 async function safeFetchMedia(raw: string, init: RequestInit = {}): Promise<Response> {
@@ -83,19 +97,6 @@ interface MediaFetchManifest {
   entries: MediaFetchEntry[];
 }
 
-function sanitizeExtFromContentType(contentType?: string, sourceUrl?: string): string {
-  if (contentType?.includes('jpeg')) return '.jpg';
-  if (contentType?.includes('png')) return '.png';
-  if (contentType?.includes('gif')) return '.gif';
-  if (contentType?.includes('webp')) return '.webp';
-  if (contentType?.includes('mp4')) return '.mp4';
-  try {
-    const ext = path.extname(new URL(sourceUrl ?? '').pathname);
-    if (ext) return ext;
-  } catch {}
-  return '.bin';
-}
-
 async function loadManifest(): Promise<MediaFetchManifest | null> {
   const manifestPath = bookmarkMediaManifestPath();
   if (!(await pathExists(manifestPath))) return null;
@@ -109,7 +110,7 @@ export async function fetchBookmarkMediaBatch(
   const maxBytes = options.maxBytes ?? 50 * 1024 * 1024;
   const mediaDir = bookmarkMediaDir();
   const manifestPath = bookmarkMediaManifestPath();
-  await ensureDir(mediaDir);
+  await ensureSensitiveDir(mediaDir);
 
   const bookmarks = await readJsonLines<BookmarkRecord>(twitterBookmarksCachePath());
   const candidates = bookmarks
@@ -235,7 +236,7 @@ export async function fetchBookmarkMediaBatch(
         }
 
         const digest = createHash('sha256').update(buffer).digest('hex').slice(0, 16);
-        const ext = sanitizeExtFromContentType(response.headers.get('content-type') ?? contentType ?? undefined, validatedUrl.toString());
+        const ext = sanitizeExtFromContentType(response.headers.get('content-type') ?? contentType ?? undefined);
         const filename = `${bookmark.tweetId}-${digest}${ext}`;
         const localPath = path.join(mediaDir, filename);
         await writeFile(localPath, buffer);

@@ -221,7 +221,7 @@ export function buildCli() {
   program
     .name('ftx')
     .description('FieldTheory for Windows by Shango Bashi. Sync, search, classify, and explore X/Twitter bookmarks locally.')
-    .version('0.4.15')
+    .version('0.5.1')
     .showHelpAfterError()
     .hook('preAction', () => {
       console.log(LOGO);
