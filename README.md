@@ -10,7 +10,17 @@
 
 FieldTheoryX for Windows
 
-It syncs your X/Twitter bookmarks into a local cache, builds a local SQLite FTS index, and exposes a CLI that works well with shell-driven agents such as Codex ; and even better with agent harnesses such as Hermes. Bonus idea: don't even interact with FieldTheoryX manually; simply feed the repo to your agent of choice and have it sync your bookmarks into its Memory System (my own two cents: works very well with Obsidian as Memory Vault). 
+
+It syncs your X/Twitter bookmarks into a local cache, builds a local SQLite FTS index, and exposes a CLI that works well with shell-driven agents such as Codex — and even better with agent harnesses such as Hermes.
+
+Bonus idea: don’t even interact with FieldTheoryX manually. Simply feed the repo to your agent of choice and have it sync your bookmarks into its Memory System (works very well with Obsidian as a Memory Vault).
+
+## Disclaimer 
+
+This release includes substantial security hardening across LLM transport, SQL safety, media handling, DevTools loopback enforcement, Windows secret storage, and filesystem protections. 
+See `SECURITY-HARDENING.md` for details. Still, be careful using this; in this day and age, never trust — always verify.
+
+For the full story behind this Windows-first fork, the motivation, and detailed context, see the release post: [FieldTheoryX Release Announcement](https://blog.shangobashi.com/posts/fieldtheoryx.html).
 
 ## Release Status
 
@@ -30,7 +40,8 @@ This release also includes substantial security hardening across LLM transport, 
 
 ## Inspiration
 
-This project is completely inspired by **FieldTheory by Andrew Farah**, for mac OS. The original project established the local-first bookmark workflow and the overall CLI shape that this fork builds on.
+This project is completely inspired by **FieldTheory by Andrew Farah** (the original macOS-first local-first bookmark CLI). 
+The original project established the local-first bookmark workflow and the overall CLI shape that this fork builds on.
 
 ## What Changed
 
