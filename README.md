@@ -47,14 +47,14 @@ This project is completely inspired by **FieldTheory by Andrew Farah**, for mac 
 Install from npm:
 
 ```bash
-npm install -g FieldTheoryX-cli-windowsport
+npm install -g fieldtheoryx-cli-windowsport
 ftx --help
 ```
 
 Install directly from GitHub:
 
 ```bash
-npm install -g github:shangobashi/FieldTheoryX-cli-windowsport
+npm install -g github:shangobashi/fieldtheoryx-cli-windowsport
 ftx --help
 ```
 
