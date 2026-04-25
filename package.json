@@ -1,7 +1,7 @@
 {
-  "name": "fieldtheory-cli-windowsport",
+  "name": "fieldtheoryx-cli-windowsport",
   "version": "0.5.1",
-  "description": "FieldTheory for Windows. Inspired by Andrew Farah's Field Theory CLI for local X/Twitter bookmark sync, search, and classification.",
+  "description": "FieldTheoryX for Windows. A local-first CLI for X/Twitter bookmark sync, search, and experimental classification.",
   "type": "module",
   "bin": {
     "ftx": "bin/ft.mjs"
@@ -27,11 +27,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/shangobashi/fieldtheory-cli-windowsport.git"
+    "url": "git+https://github.com/shangobashi/fieldtheoryx-cli-windowsport.git"
   },
-  "homepage": "https://github.com/shangobashi/fieldtheory-cli-windowsport#readme",
+  "homepage": "https://github.com/shangobashi/fieldtheoryx-cli-windowsport#readme",
   "bugs": {
-    "url": "https://github.com/shangobashi/fieldtheory-cli-windowsport/issues"
+    "url": "https://github.com/shangobashi/fieldtheoryx-cli-windowsport/issues"
   },
   "publishConfig": {
     "access": "public"
@@ -47,7 +47,8 @@
     "sqlite",
     "local-first",
     "self-custody",
-    "cli"
+    "cli",
+    "fieldtheoryx"
   ],
   "dependencies": {
     "commander": "^14.0.3",
